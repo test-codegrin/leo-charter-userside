@@ -340,6 +340,7 @@ function PaymentHandler() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      
 
       {/* ✅ Sounds */}
       <audio ref={successAudioRef} src="/assets/payment-success.mp3" preload="auto" />
