@@ -177,9 +177,9 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white p-8">
-      <div className="max-w-6xl">
-        <section className="rounded-2xl p-6 shadow-lg border border-neutral-800 bg-neutral-900/60 backdrop-blur">
+    <div className="min-h-screen text-white p-4">
+      
+        <section className="rounded-2xl p-6 shadow-lg">
           <h3 className="text-xl font-semibold mb-6 text-zinc-100">Profile Details</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -272,7 +272,7 @@ export default function ProfilePage() {
             )}
           </div>
         </section>
-      </div>
+      
     </div>
   );
 }

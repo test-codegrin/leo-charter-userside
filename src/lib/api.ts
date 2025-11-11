@@ -42,7 +42,7 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error("API Error:", error.response?.data || error.message);
+    // console.error("API Error:", error.response?.data || error.message);
 
     if (typeof window !== "undefined" && error.response?.status === 401) {
       const currentPath = window.location.pathname;
@@ -73,6 +73,30 @@ export const authAPI = {
   updateProfile: (payload: Partial<Record<string, string>>, token: string) => api.put("/user/profile", payload, { headers: { Authorization: `Bearer ${token}` } }),
   getUserTrips: (userId: number, token: string) => api.get(`/user/trips/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
   confirmBooking: (payload: BookingPayload) => api.post(`/invoice/generate-invoice-send/${payload.tripId}`, payload),
+  createPaymentIntent: async (payload: {
+  amount: number;
+  currency?: string;
+  email?: string;
+  description?: string;
+}) => {
+  try {
+    const response = await api.post("/payments/create-payment-intent", {
+      ...payload,
+      currency: payload.currency || "cad",
+    });
+    // ✅ return both full response and data keys
+    return {
+      ...response.data,
+      raw: response,
+    };
+  } catch (error) {
+    console.error("Error creating payment intent:", error);
+    throw error;
+  }
+},
+
+  getPaymentStatus: (invoiceId: number) => api.get(`/payments/check-payment-status/${invoiceId}`),
+  addPaymentDetails: (payload: { invoiceId: number;  clientSecret: string,paymentIntentId: string,userId: number}) => api.post(`/payments/add-payment-details`, payload),
 };
 
 export default api;

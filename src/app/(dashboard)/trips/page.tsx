@@ -101,7 +101,7 @@ export default function TripsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white p-8">
-      <div className="max-w-7xl">
+     
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold text-zinc-100">My Trips</h1>
           <Button
@@ -224,7 +224,7 @@ export default function TripsPage() {
             </TableBody>
           </Table>
         </div>
-      </div>
+
     </div>
   );
 }

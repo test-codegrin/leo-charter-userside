@@ -77,7 +77,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
       : "User";
 
   return (
-    <nav className="flex items-center justify-between bg-neutral-900 text-white px-6 py-4 border-b border-neutral-800 sticky top-0 z-50">
+    <nav className="flex items-center justify-between bg-neutral-900 text-white px-6 py-4 sticky top-0 z-50">
       {/* Left section - Menu + Title */}
       <div className="flex items-center gap-3">
         <Button
@@ -88,17 +88,10 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         >
           <Menu size={22} />
         </Button>
-        <h1 className="text-lg font-semibold text-zinc-200 hidden sm:block">
-          Dashboard
-        </h1>
       </div>
 
       {/* Right section - Notifications & Profile */}
-      <div className="flex items-center gap-4">
-        <Button isIconOnly variant="light" className="hover:bg-neutral-800">
-          <Bell size={20} />
-        </Button>
-
+      
         <Dropdown placement="bottom-end">
           <DropdownTrigger>
             <div className="flex items-center gap-2 cursor-pointer select-none">
@@ -128,7 +121,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-      </div>
+      
     </nav>
   );
 }
