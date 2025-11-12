@@ -26,7 +26,7 @@ import { authAPI } from "@/lib/api";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { AxiosError } from "axios";
-import { CheckCircleIcon } from "lucide-react";
+import { CheckCircleIcon, FileText } from "lucide-react";
 
 interface DecodedData {
   invoiceId: number;
@@ -52,6 +52,7 @@ export default function PaymentHandler() {
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
 
+  const [invoiceLink, setInvoiceLink] = useState<string | null>(null);
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null); // ✅ New state for receipt link
 
   const successAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -91,7 +92,21 @@ export default function PaymentHandler() {
       setError("Invalid or expired payment link");
       setLoading(false);
     }
-  }, [searchParams]);
+  }, [searchParams,paymentDone]);
+
+  useEffect(() => {
+    if (decoded) {
+      (async () => {
+        try {
+          const res = await authAPI.getInvoice(decoded.invoiceId);
+          setInvoiceLink(res.data.invoice.invoiceLink);
+        } catch (err) {
+          console.error("Failed to get invoice receipt:", err);
+          setError("Failed to get invoice receipt");
+        }
+      })();
+    }
+  }, [decoded]);
 
   // ✅ Handle Stripe payment
   const handlePayment = async (e: FormEvent<HTMLFormElement>) => {
@@ -187,10 +202,30 @@ export default function PaymentHandler() {
         <h2 className="text-2xl font-semibold text-center mb-4 text-zinc-200">
           Invoice #{decoded?.invoiceId}
         </h2>
-        <iframe
-          src={decoded?.invoiceLink}
-          className="flex-1 rounded-lg border border-neutral-800 shadow-inner"
-        />
+        {/* Hidden on mobile, visible from md and up */}
+        <div className="hidden md:block">
+          {invoiceLink ? (
+            <iframe
+              src={invoiceLink}
+              className="flex-1 w-full h-[calc(100vh-150px)] rounded-lg border border-neutral-800 shadow-inner"
+            />
+          ) : (
+            <p className="text-gray-400 text-center mt-4">Loading invoice...</p>
+          )}
+        </div>
+
+        {/* Mobile view: show button to open invoice */}
+        <div className="block md:hidden text-center mt-4">
+          {invoiceLink && (
+            <Button
+              onPress={() => window.open(invoiceLink, "_blank")}
+              color="primary"
+              startContent={<FileText className="w-4 h-4" />}
+            >
+              View Invoice PDF
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* RIGHT SIDE - Payment Form */}
@@ -201,8 +236,8 @@ export default function PaymentHandler() {
             Payment has already been completed for this invoice.
             {receiptUrl && (
               <Button
-                onClick={() => window.open(receiptUrl, "_blank")}
-                className=""
+                onPress={() => window.open(receiptUrl, "_blank")}
+                startContent={<FileText className="w-4 h-4" />}
               >
                 View Stripe Receipt
               </Button>
@@ -279,7 +314,7 @@ export default function PaymentHandler() {
                 isDisabled={!cardReady || processing}
                 className="w-full py-2 text-lg font-semibold tracking-wide"
               >
-                {processing ? <Spinner size="sm" /> : cardReady ? "Pay Now" : "Loading Card..."}
+                {processing ? <Spinner size="sm" color="white" /> : cardReady ? "Pay Now" : "Loading Card..."}
               </Button>
 
               <p className="text-xs text-center text-zinc-500 mt-2">
@@ -310,17 +345,6 @@ export default function PaymentHandler() {
               Thank you! Your payment for invoice #{decoded?.invoiceId} is complete.
             </p>
 
-            {/* ✅ Stripe Receipt URL Link */}
-            {receiptUrl && (
-              <a
-                href={receiptUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 underline text-sm mt-2 inline-block hover:text-blue-300"
-              >
-                View Stripe Receipt ↗
-              </a>
-            )}
           </ModalBody>
           <ModalFooter>
             <Button color="success" variant="flat" onPress={() => setSuccessOpen(false)}>

@@ -94,7 +94,7 @@ export const authAPI = {
     throw error;
   }
 },
-
+  getInvoice: (invoiceId: number) => api.get(`/user/invoice/${invoiceId}`),
   getPaymentStatus: (invoiceId: number) => api.get(`/payments/check-payment-status/${invoiceId}`),
   addPaymentDetails: (payload: { invoiceId: number;  clientSecret: string,paymentIntentId: string,userId: number}) => api.post(`/payments/add-payment-details`, payload),
 };
