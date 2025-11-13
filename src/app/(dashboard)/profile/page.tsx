@@ -84,13 +84,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 text-white p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-4">
-            <Spinner size="lg" color="primary" />
-            <div className="text-zinc-300">Loading profile...</div>
-          </div>
-        </div>
+     <div className="flex items-center justify-center min-h-screen text-white">
+        <Spinner size="lg" color="primary" />
       </div>
     );
   }
