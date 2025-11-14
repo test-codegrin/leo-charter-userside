@@ -1,8 +1,10 @@
 "use client";
 
 import { Calendar, Clock, MapPin } from "lucide-react";
-import { Button, Chip } from "@heroui/react";
+import { Button, Chip, Divider } from "@heroui/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation"; // ✅ Changed import
+import { routes } from "@/lib/routes";
 
 interface FleetItem {
   vehicleClass: string;
@@ -31,6 +33,8 @@ interface Trip {
   fleet: FleetItem[];
   itinerary: Itinerary;
   created_at: string;
+  invoiceLink: string;
+  receiptUrl: string;
 }
 
 interface TripCardProps {
@@ -38,6 +42,7 @@ interface TripCardProps {
 }
 
 export default function TripCard({ trip }: TripCardProps) {
+  const router = useRouter(); // ✅ Use the hook inside the component
   const pickup = trip.itinerary.pickups[0];
   const dropoff = trip.itinerary.dropoffs[0];
   const vehicle = trip.fleet[0];
@@ -66,10 +71,10 @@ export default function TripCard({ trip }: TripCardProps) {
   };
 
   return (
-    <div className="bg-neutral-900 rounded-2xl overflow-hidden transition-all duration-300">
-      <div className="flex flex-col md:flex-row gap-6 p-6">
+    <div className="bg-neutral-900 rounded-3xl overflow-hidden transition-all duration-300">
+      <div className="flex flex-col md:flex-row gap-6">
         {/* Vehicle Image */}
-        <div className="shrink-0 w-full md:w-64 h-48 rounded-xl flex items-center justify-center overflow-hidden relative">
+        <div className="shrink-0 w-full md:w-64 h-48 rounded-xl flex items-center justify-center overflow-hidden relative p-6">
           {vehicle?.vehicleImage ? (
             <Image
               src={vehicle.vehicleImage}
@@ -84,60 +89,78 @@ export default function TripCard({ trip }: TripCardProps) {
         </div>
 
         {/* Trip Details */}
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-3 p-6">
           {/* Header with Status Badge */}
           <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-xl font-semibold text-white mb-1">
+              <h2 className="text-xl font-semibold text-white">
                 {pickup && formatDateTime(pickup.pickUpDate, pickup.pickUpTime)}
               </h2>
-              <p className="text-zinc-400 text-sm">
-                {vehicle?.preferedVehicleType || "Vehicle Type Not Specified"} 
-              </p>
-            </div>
+
             {trip.isQuoteAccepted === 1 && (
-              <Chip
-                color="success"
-                variant="flat"
-                startContent={
-                  <span className="text-green-500 text-base">✓</span>
-                }
-                className="font-medium"
-              >
-                Quote Accepted
-              </Chip>
+              <div className="flex items-center gap-2 text-center bg-green-950 rounded-full p-2">
+                <span className=" text-neutral-900 h-4 w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">✓</span>
+                <span className="font-bold text-green-300 text-xs">Quote Accepted</span>
+              </div>
             )}
+          </div>
+
+          <div className="text-white text-md">
+            {vehicle?.preferedVehicleType || "Vehicle Type Not Specified"} 
           </div>
 
           {/* Service Type */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-zinc-400">{trip.service}</span>
+            <span className="text-md font-medium text-white">{trip.service}</span>
           </div>
 
           {/* Location Info */}
           {pickup && (
-            <div className="flex items-start gap-2 text-white">
-              <MapPin size={20} className="text-zinc-400 mt-0.5 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-white text-md mt-5">
+              <div className="w-3 h-3 bg-white rounded-full mx-2" />
               <div>
-                <p className="font-medium">{pickup.pickUpAddress}</p>
-                {dropoff && (
-                  <p className="text-zinc-400 text-sm mt-1">
-                    → {dropoff.dropOffAddress}
-                  </p>
-                )}
+                <p className="font-medium text-white text-md">{pickup.pickUpAddress}</p>
               </div>
             </div>
           )}
-
-          {/* Details Button */}
-          <Button
-            className="bg-transparent border border-neutral-700 text-white hover:bg-neutral-800 mt-4"
-            size="md"
+        </div>
+      </div>
+      
+      <div className="flex w-full">
+        <Button
+            color="default"
+            variant="light"
+            onPress={() => router.push(`/trips/${trip.id}`)}
+            className="w-full font-semibold text-md text-primary"
           >
             Details
           </Button>
-        </div>
-      </div>
+          {trip.invoiceLink && (
+            <>
+            <div className="w-1 bg-primary rounded-full"/>
+            <Button
+              color="default"
+              variant="light"
+              onPress={() => window.open(trip.invoiceLink, "_blank")}
+              className="w-full font-semibold text-md text-primary"
+            >
+              Invoice
+            </Button>
+            </>
+          )}
+          {trip.receiptUrl && (
+            <>
+            <div className="w-1 bg-primary rounded-full"/>
+            <Button
+              color="default"
+              variant="light"
+              onPress={() => window.open(trip.receiptUrl, "_blank")}
+              className="w-full font-semibold text-md text-primary"
+            >
+              Payment Receipt
+            </Button>
+            </>
+          )}
+       </div>
     </div>
   );
 }

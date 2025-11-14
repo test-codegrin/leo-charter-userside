@@ -40,6 +40,8 @@ interface Trip {
   updated_at: string;
   fleet: FleetItem[];
   itinerary: Itinerary;
+  invoiceLink: string;
+  receiptUrl: string;
 }
 
 export default function TripsPage() {
@@ -93,9 +95,6 @@ export default function TripsPage() {
       <div className="min-h-screen flex flex-col items-center justify-center text-white">
         <h2 className="text-xl font-medium text-zinc-300 mb-2">No Trips Found</h2>
         <p className="text-zinc-500 mb-4">You have not booked any trips yet.</p>
-        <Button color="primary" onPress={() => router.push(routes.dashboard)}>
-          Go Back
-        </Button>
       </div>
     );
   }

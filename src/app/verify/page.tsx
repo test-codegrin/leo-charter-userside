@@ -64,7 +64,7 @@ export default function VerifyOtp() {
         localStorage.setItem("user", JSON.stringify(res.data.user));
         localStorage.removeItem("pendingEmail");
         localStorage.removeItem("otpToken");
-        router.push(routes.dashboard);
+        router.push(routes.trips);
       } else {
         addToast({
           title: "Invalid OTP ❌",

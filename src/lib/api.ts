@@ -95,6 +95,7 @@ export const authAPI = {
   }
 },
   getInvoice: (invoiceId: number) => api.get(`/user/invoice/${invoiceId}`),
+  getTripById:(tripId: number ,token :string) => api.get(`/user/trip-details/${tripId}`,{ headers: { Authorization: `Bearer ${token}` } }),
   getPaymentStatus: (invoiceId: number) => api.get(`/payments/check-payment-status/${invoiceId}`),
   addPaymentDetails: (payload: { invoiceId: number;  clientSecret: string,paymentIntentId: string,userId: number}) => api.post(`/payments/add-payment-details`, payload),
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Card, CardBody, addToast } from "@heroui/react";
 import { authAPI } from "@/lib/api";
@@ -10,7 +10,22 @@ import { AxiosError } from "axios";
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true); // Prevent flash of content
   const router = useRouter();
+
+  // ✅ Check if user is already authenticated
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (token && user) {
+      // User is already logged in, redirect to dashboard
+      router.push(routes.trips);
+      return;
+    }
+
+    setChecking(false); // Allow rendering if not authenticated
+  }, [router]);
 
   const handleSendOtp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,7 +43,7 @@ export default function SignIn() {
       setLoading(true);
       const res = await authAPI.sendOtp(email);
 
-      // ✅ Handle 204 manually (Axios doesn’t auto reject)
+      // ✅ Handle 204 manually (Axios doesn't auto reject)
       if (res.status === 204) {
         addToast({
           title: "Email Not Found",
@@ -66,6 +81,15 @@ export default function SignIn() {
       setLoading(false);
     }
   };
+
+  // ✅ Show nothing while checking auth status (prevents flash)
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900">
