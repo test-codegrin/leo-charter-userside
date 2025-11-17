@@ -425,22 +425,30 @@ export default function TripDetailsPage() {
 
             <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full "/>
 
-            {
-              trip.driver && (
-                <div>
-                  <h2 className="text-3xl text-primary font-semibold mb-8 flex items-center gap-2 ">
-                    Driver Details
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
-                    <DataCard title="First Name" value={trip.driver[0].driverName.split(" ")[0]} />
-                    <DataCard title="Last Name" value={trip.driver[0].driverName.split(" ")[1]} />
-                    <DataCard title="Phone Number" value={trip.driver[0].phoneNo} />
-                  </div>
-                  <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full "/>
-                </div>
-                
-              )
-            }
+            {/* Driver Details - Using optional chaining */}
+{trip.driver?.[0]?.driverName && (
+  <div>
+    <h2 className="text-3xl text-primary font-semibold mb-8 flex items-center gap-2">
+      Driver Details
+    </h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
+      <DataCard 
+        title="First Name" 
+        value={trip.driver[0]?.driverName?.split(" ")?.[0] ?? "N/A"} 
+      />
+      <DataCard 
+        title="Last Name" 
+        value={trip.driver[0]?.driverName?.split(" ")?.[1] ?? "N/A"} 
+      />
+      <DataCard 
+        title="Phone Number" 
+        value={trip.driver[0]?.phoneNo ?? "N/A"} 
+      />
+    </div>
+    <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
+  </div>
+)}
+
             
             <TermsAndConditions />
             
