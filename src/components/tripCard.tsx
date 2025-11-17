@@ -71,77 +71,66 @@ export default function TripCard({ trip }: TripCardProps) {
   };
 
   return (
-    <div className="bg-neutral-900 rounded-3xl overflow-hidden transition-all duration-300">
+    <div className="bg-neutral-900 rounded-2xl lg:rounded-3xl overflow-hidden transition-all duration-300 relative">
+       <div className="absolute lg:top-4 lg:right-4 top-2 right-2">
+              {trip.isQuoteAccepted === 1 && (
+              <div className="flex items-center lg:w-35 gap-2 text-center bg-green-950 rounded-full px-2 py-1">
+                <span className=" text-neutral-900 h-4 w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">✓</span>
+                <span className="font-medium text-green-300 lg:text-sm text-xs">Quote Accepted</span>
+              </div>
+            )}
+            </div>
       <div className="flex flex-col md:flex-row md:gap-6">
         
         {/* Vehicle Image */}
         <div className="shrink-0 w-full md:w-64 h-48 rounded-xl flex items-center justify-center overflow-hidden relative p-6">
           {vehicle?.vehicleImage ? (
-          <div className="relative">
+          
               <Image
               src={vehicle.vehicleImage}
               alt={vehicle.preferedVehicleType || "Vehicle"}
               className="object-contain"
               width={500}
               height={100}
-            >
-            
-            </Image>
-            <div className="lg:hidden absolute -top-4 -right-4">
-              {trip.isQuoteAccepted === 1 && (
-              <div className="flex items-center lg:w-35 gap-2 text-center bg-green-950 rounded-full px-2 py-1">
-                <span className=" text-neutral-900 h-4 w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">✓</span>
-                <span className="text-green-300 text-[11px]">Quote Accepted</span>
-              </div>
-            )}
-            </div>
-            
-            </div>
+            />
+           
+        
           ) : (
             <div className="text-zinc-600">No Image</div>
           )}
         </div>
 
         {/* Trip Details */}
-        <div className="flex-1 space-y-3 p-6">
+        <div className="flex-1 space-y-3 p-6 md:mt-4">
           {/* Header with Status Badge */}
-          <div className="flex justify-between items-start">
-              <h2 className="text-xl font-semibold text-white">
+          
+              <h2 className="md:text-xl text-md font-semibold text-white">
                 {pickup && formatDateTime(pickup.pickUpDate, pickup.pickUpTime)}
               </h2>
+          
 
-            <div className="lg:block hidden">
-              {trip.isQuoteAccepted === 1 && (
-              <div className="flex items-center gap-2 text-center bg-green-950 rounded-full p-2">
-                <span className=" text-neutral-900 h-4 w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">✓</span>
-                <span className="font-bold text-green-300 text-xs">Quote Accepted</span>
-              </div>
-            )}
-            </div>
-          </div>
-
-          <div className="text-white text-md">
+          <div className="text-white text-sm">
             {vehicle?.preferedVehicleType || "Vehicle Type Not Specified"} 
           </div>
 
           {/* Service Type */}
           <div className="flex items-center gap-2">
-            <span className="text-md font-medium text-white">{trip.service}</span>
+            <span className="text-md font-medium text-white md:no-underline underline underline-offset-6 decoration-dotted ">{trip.service}</span>
           </div>
 
           {/* Location Info */}
           {pickup && (
-            <div className="flex items-center gap-2 text-white text-md mt-5">
+            <div className="flex items-center gap-2 text-white mt-5">
               <div className="w-3 h-3 bg-white rounded-full mx-2" />
               <div>
-                <p className="font-medium text-white text-md">{pickup.pickUpAddress}</p>
+                <p className="font-medium text-white text-md md:no-underline underline underline-offset-6 decoration-dotted">{pickup.pickUpAddress}</p>
               </div>
             </div>
           )}
         </div>
       </div>
       
-      <div className="flex w-full">
+      <div className="flex md:flex-row flex-col w-full">
         <Button
             color="default"
             variant="light"
@@ -152,7 +141,7 @@ export default function TripCard({ trip }: TripCardProps) {
           </Button>
           {trip.invoiceLink && (
             <>
-            <div className="w-1 bg-primary rounded-full"/>
+            <div className="w-1 bg-primary rounded-full md:block hidden"/>
             <Button
               color="default"
               variant="light"
@@ -165,7 +154,7 @@ export default function TripCard({ trip }: TripCardProps) {
           )}
           {trip.receiptUrl && (
             <>
-            <div className="w-1 bg-primary rounded-full"/>
+            <div className="w-1 bg-primary rounded-full md:block hidden"/>
             <Button
               color="default"
               variant="light"

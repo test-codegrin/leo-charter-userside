@@ -6,6 +6,7 @@ import { Button, Input, Card, CardBody, addToast } from "@heroui/react";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
 import { AxiosError } from "axios";
+import Image from "next/image";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -92,7 +93,8 @@ export default function SignIn() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900">
+    <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900 relative">
+      <Image src="/assets/leo.png" alt="Leo Charter Services" width={200} height={60} className="absolute top-4 left-4"/>
       <Card className="w-[400px] bg-black text-white rounded-3xl shadow-2xl">
         <CardBody className="flex flex-col gap-6 p-8">
           <form onSubmit={handleSendOtp} className="flex flex-col gap-6">
@@ -102,10 +104,12 @@ export default function SignIn() {
 
             <Input
               isRequired
+              isDisabled={loading}
               errorMessage="Please enter a valid email"
-              label="Email"
+              label="Email Address"
               type="email"
               size="md"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="text-white"
@@ -121,7 +125,7 @@ export default function SignIn() {
               size="md"
               className="text-md"
             >
-              Send OTP
+              Sign In
             </Button>
           </form>
         </CardBody>

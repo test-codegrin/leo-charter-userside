@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, CardBody, addToast, InputOtp } from "@heroui/react";
+import { Button, Card, CardBody, addToast, InputOtp, Progress } from "@heroui/react";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
 import { AxiosError } from "axios";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function VerifyOtp() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function VerifyOtp() {
         description: "Please sign in again to request a new OTP.",
         color: "danger",
       });
-      router.push(routes.login);
+      router.replace(routes.login);
       return;
     }
 
@@ -64,8 +65,13 @@ export default function VerifyOtp() {
         localStorage.setItem("user", JSON.stringify(res.data.user));
         localStorage.removeItem("pendingEmail");
         localStorage.removeItem("otpToken");
-        router.push(routes.trips);
+
+        // ✅ Redirect after 1 second
+        setTimeout(() => {
+          router.replace(routes.trips);
+        }, 1000);
       } else {
+        setLoading(false);
         addToast({
           title: "Invalid OTP ❌",
           description: "Please enter the correct OTP or request a new one.",
@@ -75,13 +81,12 @@ export default function VerifyOtp() {
     } catch (error: unknown) {
       const err = error as AxiosError<{ message?: string }>;
       console.error(err);
+      setLoading(false);
       addToast({
         title: "Verification Failed ⚠️",
         description: err.response?.data?.message || "OTP invalid or expired.",
         color: "danger",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -96,7 +101,7 @@ export default function VerifyOtp() {
       setToken(res.data.token);
 
       addToast({
-        title: "OTP Resent 🔁",
+        title: "OTP Resent",
         description: `A new OTP has been sent to ${email}`,
         color: "success",
       });
@@ -110,7 +115,7 @@ export default function VerifyOtp() {
     } catch (err) {
       console.error(err);
       addToast({
-        title: "Resend Failed ❌",
+        title: "Resend Failed !",
         description: "Unable to resend OTP. Please try again.",
         color: "danger",
       });
@@ -119,20 +124,46 @@ export default function VerifyOtp() {
     }
   };
 
+  // ✅ Handle back button
+  const handleBack = () => {
+    localStorage.removeItem("pendingEmail");
+    localStorage.removeItem("otpToken");
+    router.replace(routes.login);
+  };
+
+  // ✅ Fullscreen loading state
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
+        
+          <Progress 
+            isIndeterminate 
+            aria-label="Loading..." 
+            className="max-w-xs w-full " 
+            size="sm"
+            color="primary"
+          />
+      
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900">
-      <Card className="w-[400px] bg-black text-white rounded-3xl shadow-2xl">
-        <CardBody className="flex flex-col gap-6 p-8 items-center justify-center">
+      <Card className="w-full max-w-[400px] mx-4 bg-black text-white rounded-3xl shadow-2xl">
+        <CardBody className="flex flex-col gap-6 p-6 sm:p-8 items-center justify-center">
           <form
             onSubmit={handleVerify}
             className="flex flex-col gap-6 w-full items-center"
           >
-            <h1 className="text-3xl font-semibold text-center text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-center text-white tracking-tight">
               Verify OTP
             </h1>
 
-            <p className="text-center text-sm text-zinc-400">
-              OTP sent to <b>{email}</b>
+            <p className="text-center text-xs sm:text-sm text-zinc-400">
+              We&apos;ve emailed a 6-digit confirmation code <br /> 
+              at <span className="underline underline-offset-4">{email}</span>. Please enter <br />
+              the code in below box to verify your email.
             </p>
 
             <div className="flex justify-center w-full">
@@ -150,27 +181,41 @@ export default function VerifyOtp() {
             </div>
 
             <Button
-              isLoading={loading}
               type="submit"
               color="primary"
               radius="sm"
-              size="md"
-              className="text-md w-full"
+              size="lg"
+              className="text-base sm:text-lg font-semibold w-full"
+              disabled={otp.length !== 6}
             >
-              Verify OTP
+              Continue <ArrowRight size={20}/>
+            </Button>
+            
+            <Button
+              onPress={handleBack}
+              color="primary"
+              radius="sm"
+              size="lg"
+              variant="bordered"
+              className="text-base sm:text-lg font-semibold w-full"
+            >
+              <ArrowLeft size={20}/> Back 
             </Button>
 
-            <div className="flex items-center justify-center mt-2">
-              <Button
-                disabled={timer > 0}
-                isLoading={resendLoading}
-                onPress={handleResendOtp}
-                variant="flat"
-                color={timer > 0 ? "default" : "secondary"}
-                className="text-sm font-medium"
+            <div className="flex items-center justify-center mt-2 text-xs sm:text-sm">
+              Don&apos;t have a code? 
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={timer > 0 || resendLoading}
+                className={`ml-1 ${
+                  timer > 0
+                    ? 'text-zinc-500 cursor-not-allowed' 
+                    : 'text-primary cursor-pointer hover:underline'
+                }`}
               >
-                {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
-              </Button>
+                {resendLoading ? 'Sending...' : timer > 0 ? `Resend (${timer}s)` : 'Resend'}
+              </button>
             </div>
           </form>
         </CardBody>

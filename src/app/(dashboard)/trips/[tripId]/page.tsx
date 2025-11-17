@@ -1,3 +1,4 @@
+// app/(dashboard)/trips/[tripId]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,10 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { Spinner, Button, addToast } from "@heroui/react";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
-import { AxiosError } from "axios"; // ✅ Import AxiosError
-import {    
-  ChevronLeft,
-} from "lucide-react";
+import { AxiosError } from "axios";
+import { ChevronLeft } from "lucide-react";
 import DataCard from "@/components/dataCard";
 import TermsAndConditions from "@/components/TermsAndConditions";
 
@@ -108,7 +107,6 @@ interface TripDetail {
   summary: Summary[];
 }
 
-// ✅ Define error response type
 interface ErrorResponse {
   success: boolean;
   message: string;
@@ -129,7 +127,6 @@ export default function TripDetailsPage() {
     const day = dateObj.getDate();
     const year = dateObj.getFullYear();
     
-    // Get day suffix (st, nd, rd, th)
     const suffix = 
       day === 1 || day === 21 || day === 31 ? "st" :
       day === 2 || day === 22 ? "nd" :
@@ -160,14 +157,13 @@ export default function TripDetailsPage() {
           return;
         }
 
-        // Validate tripId
         if (!tripId || isNaN(tripId)) {
           addToast({
             title: "Invalid Trip ID",
             description: "The trip ID provided is invalid.",
             color: "danger",
           });
-          //   router.push(routes.trips);
+          router.push(routes.trips);
           return;
         }
 
@@ -181,7 +177,6 @@ export default function TripDetailsPage() {
       } catch (err: unknown) {
         console.error("Error loading trip details:", err);
 
-        // ✅ Handle Axios errors with specific status codes
         if (err instanceof AxiosError) {
           const axiosError = err as AxiosError<ErrorResponse>;
           const status = axiosError.response?.status;
@@ -192,53 +187,47 @@ export default function TripDetailsPage() {
 
           switch (status) {
             case 400:
-              // Bad Request - Invalid trip ID format
               addToast({
                 title: "Invalid Request",
                 description: message || "The trip ID provided is invalid.",
                 color: "danger",
               });
-              //   router.push(routes.trips);
+              router.push(routes.trips);
               break;
 
             case 401:
-              // Unauthorized - Invalid or expired token
               addToast({
                 title: "Session Expired",
                 description:
                   message || "Your session has expired. Please login again.",
                 color: "danger",
               });
-              // Clear invalid tokens
               localStorage.removeItem("token");
               localStorage.removeItem("user");
               router.push(routes.login);
               break;
 
             case 403:
-              // Forbidden - User doesn't own this trip
               addToast({
                 title: "Access Denied",
                 description:
                   message || "You are not authorized to view this trip.",
                 color: "danger",
               });
-              //   router.push(routes.trips);
+              router.push(routes.trips);
               break;
 
             case 404:
-              // Not Found - Trip doesn't exist
               addToast({
                 title: "Trip Not Found",
                 description:
                   message || "The requested trip could not be found.",
                 color: "warning",
               });
-              //   router.push(routes.trips);
+              router.push(routes.trips);
               break;
 
             case 500:
-              // Server Error
               addToast({
                 title: "Server Error",
                 description:
@@ -249,7 +238,6 @@ export default function TripDetailsPage() {
               break;
 
             default:
-              // Network or other errors
               if (axiosError.code === "ERR_NETWORK") {
                 addToast({
                   title: "Network Error",
@@ -273,7 +261,6 @@ export default function TripDetailsPage() {
               }
           }
         } else {
-          // Non-Axios errors
           addToast({
             title: "Unexpected Error",
             description: "An unexpected error occurred. Please try again.",
@@ -300,7 +287,7 @@ export default function TripDetailsPage() {
 
   if (!trip) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-white">
+      <div className="min-h-screen flex flex-col items-center justify-center text-white px-4">
         <h2 className="text-xl font-medium text-zinc-300 mb-2">
           Trip Not Found
         </h2>
@@ -312,57 +299,62 @@ export default function TripDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 text-white">
+    <div className="min-h-screen px-4 py-4 sm:px-6 md:px-8 md:py-8 text-white">
       {/* Header */}
-      <div className="flex items-center gap-4 justify-between mb-1">
-        <div className="flex justify-center">
-          <button
-            onClick={() => router.push(routes.trips)}
-            className="flex items-center gap-2 cursor-pointer text-primary font-semibold text-md"
-          >
-            <ChevronLeft size={25} />
-            <span>BACK</span>
-          </button>
-        </div>
+      <div className="flex items-center justify-between mb-4 md:mb-1 gap-2">
+        <button
+          onClick={() => router.push(routes.trips)}
+          className="flex items-center gap-1 sm:gap-2 cursor-pointer text-primary font-semibold text-sm sm:text-md"
+        >
+          <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+          <span>BACK</span>
+        </button>
 
         {trip.isQuoteAccepted === 1 && (
-          <div className="flex items-center gap-2 text-center bg-green-950 rounded-full p-2">
-            <span className=" text-neutral-900 h-4 w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">
+          <div className="flex items-center gap-1 sm:gap-2 text-center bg-green-950 rounded-full px-2 py-1">
+            <span className="text-neutral-900 h-3 w-3 sm:h-4 sm:w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">
               ✓
             </span>
-            <span className="font-bold text-green-300 text-xs">
+            <span className="font-medium text-green-300 text-xs whitespace-nowrap">
               Quote Accepted
             </span>
           </div>
         )}
       </div>
 
-      <div className="ml-6">
-        <h2 className="text-3xl text-primary font-semibold mb-5 flex items-center gap-2">
-          Trip Details ({trip.externalTripId})
+      <div className="sm:ml-6">
+        {/* Title */}
+        <h2 className="text-xl sm:text-2xl md:text-3xl text-primary font-semibold mb-4 md:mb-5">
+          Trip Details
+          <span className="block sm:inline mt-1 sm:mt-0"> ({trip.externalTripId})</span>
         </h2>
         
-        <div className="relative mb-8">
+        {/* Itinerary Section */}
+        <div className="relative mb-6 md:mb-8">
           {/* Vertical connecting line */}
-          <div className="absolute top-7 left-[7px] w-[2px] bg-neutral-600 h-[calc(100%-5.4rem)]" />
-          <div className="flex flex-col gap-6 relative">
+          <div className="absolute top-6 sm:top-7 left-[7px] w-[2px] bg-neutral-600 h-[calc(100%-4.5rem)] sm:h-[calc(100%-5.4rem)]" />
+          
+          <div className="flex flex-col gap-4 sm:gap-6 relative">
             {/* Pickup */}
             {trip.itineraries?.[0]?.pickup?.map((pickup: Pickup) => (
-              <div className="flex items-start gap-5" key={pickup.itineraryId}>
-                <div className="w-4 h-4 bg-gray-300 rounded-full mt-1 z-10" />
+              <div className="flex items-start gap-3 sm:gap-5" key={pickup.itineraryId}>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-300 rounded-full mt-1 z-10 flex-shrink-0" />
                 <DataCard title="Pickup Address" value={pickup.pickups} />
               </div>
             ))}
 
-            {/* Stops (if any) */}
+            {/* Stops */}
             {trip.stops && trip.stops.length > 0 && (
               <>
                 {trip.stops.map((stop: Stop, index: number) => (
                   <div
-                    className="flex items-start gap-5 ml-9"
+                    className="flex items-start gap-3 sm:gap-5 ml-6 sm:ml-9"
                     key={stop.stopId}
                   >
-                    <DataCard title={`Stop ${index + 1} : ${stop.stopName}`} value={stop.address} />
+                    <DataCard 
+                      title={`Stop ${index + 1} : ${stop.stopName}`} 
+                      value={stop.address} 
+                    />
                   </div>
                 ))}
               </>
@@ -370,90 +362,114 @@ export default function TripDetailsPage() {
 
             {/* Dropoff */}
             {trip.itineraries?.[0]?.dropoff?.map((dropoff: Dropoff) => (
-              <div className="flex items-start gap-5" key={dropoff.itineraryId}>
-                <div className="w-4 h-4 bg-gray-300 mt-1 z-10" />
+              <div className="flex items-start gap-3 sm:gap-5" key={dropoff.itineraryId}>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-300 mt-1 z-10 flex-shrink-0" />
                 <DataCard title="Dropoff Address" value={dropoff.dropoffs} />
               </div>
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
-              <DataCard title="Service Type" value={trip.serviceOption} />
-              <DataCard title="Pickup Date and Time" value={formatDateTime(trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate, trip.itineraries?.[0]?.pickup?.[0]?.pickUpTime)} />
-              <DataCard title="Return Date and Time" value={formatDateTime(trip.itineraries?.[0]?.dropoff?.[0]?.returnDate, trip.itineraries?.[0]?.dropoff?.[0]?.returnTime)} />
-              <DataCard title="Function" value={trip.functions} />
-              <DataCard title="Number of Passengers" value={trip.numberOfPassengers} />
-              <DataCard title="Vehicle Class" value={trip.fleet?.[0]?.vehicleClass} />
-              <DataCard title="Preferred Vehicle" value={trip.fleet?.[0]?.preferedVehicleType} className="col-span-2" />
-              <DataCard title="Note to us" value={trip.noteToUs} className="col-span-2" />
-              <DataCard title="Promo Code" value={""} />
+
+        {/* Trip Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">
+          <DataCard title="Service Type" value={trip.serviceOption} />
+          <DataCard 
+            title="Pickup Date and Time" 
+            value={formatDateTime(
+              trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate, 
+              trip.itineraries?.[0]?.pickup?.[0]?.pickUpTime
+            )} 
+          />
+          <DataCard 
+            title="Return Date and Time" 
+            value={formatDateTime(
+              trip.itineraries?.[0]?.dropoff?.[0]?.returnDate, 
+              trip.itineraries?.[0]?.dropoff?.[0]?.returnTime
+            )} 
+          />
+          <DataCard title="Function" value={trip.functions} />
+          <DataCard title="Number of Passengers" value={trip.numberOfPassengers} />
+          <DataCard title="Vehicle Class" value={trip.fleet?.[0]?.vehicleClass} />
+          <DataCard 
+            title="Preferred Vehicle" 
+            value={trip.fleet?.[0]?.preferedVehicleType} 
+            className="md:col-span-2" 
+          />
+          <DataCard 
+            title="Note to us" 
+            value={trip.noteToUs} 
+            className="md:col-span-2" 
+          />
+          <DataCard title="Promo Code" value={""} />
+        </div>
+        
+        {/* Divider */}
+        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
+
+        {/* Customer Details */}
+        <div>
+          <h2 className="text-xl sm:text-2xl md:text-3xl text-primary font-semibold mb-6 md:mb-8">
+            Customer Details
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">
+            <DataCard title="First Name" value={trip.firstName} />
+            <DataCard title="Last Name" value={trip.lastName} />
+            <DataCard title="Phone Number" value={trip.phoneNo} />
+            <DataCard title="Email" value={trip.email} />
+            <DataCard title="Company" value={trip.company} />
           </div>
-          
-            <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full "/>
+        </div>
 
-            <div>
-                 <h2 className="text-3xl text-primary font-semibold mb-8 flex items-center gap-2 ">
-                    Customer Details
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
-                    <DataCard title="First Name" value={trip.firstName} />
-                    <DataCard title="Last Name" value={trip.lastName} />
-                    <DataCard title="Phone Number" value={trip.phoneNo} />
-                    <DataCard title="Email" value={trip.email} />
-                    <DataCard title="Company" value={trip.company} />
-                </div>
+        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
+
+        {/* Quotation */}
+        <div>
+          <h2 className="text-xl sm:text-2xl md:text-3xl text-primary font-semibold mb-6 md:mb-8">
+            Quotation
+          </h2>
+          <div className="flex flex-col">
+            <p className="text-sm sm:text-md text-neutral-400 mb-1">Total Amount</p>
+            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+              <span className="text-xl sm:text-2xl font-bold text-white">
+                CA${Number(trip.invoice[0]?.totalAmount || 0).toFixed(0)}
+              </span>
+              <span className="text-sm sm:text-base text-neutral-400">
+                = CA${Number(trip.invoice[0]?.quotedAmount || 0).toFixed(0)} plus{" "}
+                {Number(trip.invoice[0]?.tax || 0).toFixed(0)}% Tax plus{" "}
+                {Number(trip.invoice[0]?.gratuities || 0).toFixed(0)}% Gratuities
+              </span>
             </div>
+          </div>
+        </div>
 
-             <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full "/>
+        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
 
-             <div>
-                 <h2 className="text-3xl text-primary font-semibold mb-8 flex items-center gap-2 ">
-                    Quotation
-                </h2>
-                <div className={`flex flex-col`}>
-                    <p className="text-md text-neutral-400 mb-1">Total Amount</p>
-                    <p className="text-white text-lg">
-                        <span className="font-bold">
-                            CA${Number(trip.invoice[0].totalAmount).toFixed(0)}
-                        </span>
-                        <span className="text-lg text-neutral-400">
-                            {" = "}CA${Number(trip.invoice[0].quotedAmount).toFixed(0)} plus {Number(trip.invoice[0].tax).toFixed(0)}% Tax plus {Number(trip.invoice[0].gratuities).toFixed(0)}% Gratuities
-                        </span>
-                    </p>
-                    </div>
+        {/* Driver Details */}
+        {trip.driver?.[0]?.driverName && (
+          <div>
+            <h2 className="text-xl sm:text-2xl md:text-3xl text-primary font-semibold mb-6 md:mb-8">
+              Driver Details
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">
+              <DataCard 
+                title="First Name" 
+                value={trip.driver[0]?.driverName?.split(" ")?.[0] ?? "N/A"} 
+              />
+              <DataCard 
+                title="Last Name" 
+                value={trip.driver[0]?.driverName?.split(" ")?.[1] ?? "N/A"} 
+              />
+              <DataCard 
+                title="Phone Number" 
+                value={trip.driver[0]?.phoneNo ?? "N/A"} 
+              />
             </div>
-
-            <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full "/>
-
-            {/* Driver Details - Using optional chaining */}
-{trip.driver?.[0]?.driverName && (
-  <div>
-    <h2 className="text-3xl text-primary font-semibold mb-8 flex items-center gap-2">
-      Driver Details
-    </h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
-      <DataCard 
-        title="First Name" 
-        value={trip.driver[0]?.driverName?.split(" ")?.[0] ?? "N/A"} 
-      />
-      <DataCard 
-        title="Last Name" 
-        value={trip.driver[0]?.driverName?.split(" ")?.[1] ?? "N/A"} 
-      />
-      <DataCard 
-        title="Phone Number" 
-        value={trip.driver[0]?.phoneNo ?? "N/A"} 
-      />
-    </div>
-    <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
-  </div>
-)}
-
-            
-            <TermsAndConditions />
-            
-
-
+            <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
+          </div>
+        )}
+        
+        {/* Terms and Conditions */}
+        <TermsAndConditions />
       </div>
     </div>
   );
