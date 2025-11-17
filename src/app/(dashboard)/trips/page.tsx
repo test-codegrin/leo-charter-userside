@@ -100,18 +100,10 @@ export default function TripsPage() {
   }
 
   return (
-    <div className="min-h-screen p-8 text-white">
+    <div className="min-h-screen lg:p-8 text-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-white">Trips</h1>
-        <Button
-          variant="flat"
-          startContent={<RefreshCcw size={16} />}
-          onPress={() => window.location.reload()}
-          className="hidden md:flex"
-        >
-          Refresh
-        </Button>
       </div>
 
       {/* Trip Cards */}

@@ -8,7 +8,11 @@ module.exports = {
     "./node_modules/@heroui/theme/dist/components/(input|form).js",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        barlow: ['var(--font-barlow)'],
+      },
+    },
   },
   darkMode: "class",
   plugins: [heroui({

@@ -2,21 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Spinner, Button, addToast, Card, CardBody, Chip, Divider } from "@heroui/react";
+import { Spinner, Button, addToast } from "@heroui/react";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
 import { AxiosError } from "axios"; // ✅ Import AxiosError
-import {
-  ArrowLeft,
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
-  Car,
-  FileText,
-  User,
-  DollarSign,
-  Download,
+import {    
   ChevronLeft,
 } from "lucide-react";
 import DataCard from "@/components/dataCard";
@@ -153,9 +143,6 @@ export default function TripDetailsPage() {
 
     return `${dayName}, ${month} ${day}${suffix}, ${year} - ${formattedTime}`;
   };
-
-  const taxAmount = Number(trip?.invoice[0].tax) * Number(trip?.invoice[0].quotedAmount) / 100;
-  const gratuitiesAmount = Number(trip?.invoice[0].gratuities) * Number(trip?.invoice[0].quotedAmount) /100;
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -390,7 +377,7 @@ export default function TripDetailsPage() {
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
               <DataCard title="Service Type" value={trip.serviceOption} />
               <DataCard title="Pickup Date and Time" value={formatDateTime(trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate, trip.itineraries?.[0]?.pickup?.[0]?.pickUpTime)} />
               <DataCard title="Return Date and Time" value={formatDateTime(trip.itineraries?.[0]?.dropoff?.[0]?.returnDate, trip.itineraries?.[0]?.dropoff?.[0]?.returnTime)} />
@@ -408,7 +395,7 @@ export default function TripDetailsPage() {
                  <h2 className="text-3xl text-primary font-semibold mb-8 flex items-center gap-2 ">
                     Customer Details
                 </h2>
-                <div className="grid grid-cols-2 gap-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
                     <DataCard title="First Name" value={trip.firstName} />
                     <DataCard title="Last Name" value={trip.lastName} />
                     <DataCard title="Phone Number" value={trip.phoneNo} />
@@ -438,7 +425,25 @@ export default function TripDetailsPage() {
 
             <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full "/>
 
+            {
+              trip.driver && (
+                <div>
+                  <h2 className="text-3xl text-primary font-semibold mb-8 flex items-center gap-2 ">
+                    Driver Details
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
+                    <DataCard title="First Name" value={trip.driver[0].driverName.split(" ")[0]} />
+                    <DataCard title="Last Name" value={trip.driver[0].driverName.split(" ")[1]} />
+                    <DataCard title="Phone Number" value={trip.driver[0].phoneNo} />
+                  </div>
+                  <div className="my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full "/>
+                </div>
+                
+              )
+            }
+            
             <TermsAndConditions />
+            
 
 
       </div>
