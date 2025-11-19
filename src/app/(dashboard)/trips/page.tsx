@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Spinner, Button, addToast } from "@heroui/react";
+import { Spinner, Button, addToast, Progress } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
@@ -85,7 +85,13 @@ export default function TripsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-white">
-        <Spinner size="lg" color="primary" />
+         <Progress
+            isIndeterminate 
+            aria-label="Loading..." 
+            className="max-w-xs w-full " 
+            size="sm"
+            color="primary"
+          />
       </div>
     );
   }
@@ -103,7 +109,7 @@ export default function TripsPage() {
     <div className="min-h-screen lg:p-8 text-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-white">Trips</h1>
+        <h1 className="text-xl font-sans font-semibold text-white">Trips</h1>
       </div>
 
       {/* Trip Cards */}

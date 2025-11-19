@@ -58,12 +58,6 @@ export default function SignIn() {
       localStorage.setItem("pendingEmail", email);
       localStorage.setItem("otpToken", res.data.token);
 
-      addToast({
-        title: "OTP Sent ✅",
-        description: `OTP has been sent to ${email}. Please check your inbox.`,
-        color: "success",
-      });
-
       router.push(routes.verify);
     } catch (error: unknown) {
       const err = error as AxiosError<{ message?: string }>;
@@ -74,7 +68,7 @@ export default function SignIn() {
         `Unexpected error (${err.response?.status || "Network"})`;
 
       addToast({
-        title: "Failed to Send OTP ❌",
+        title: "Failed to Send OTP",
         description: message,
         color: "danger",
       });
@@ -95,10 +89,10 @@ export default function SignIn() {
   return (
     <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900 relative">
       <Image src="/assets/leo.png" alt="Leo Charter Services" width={200} height={60} className="absolute top-4 left-4"/>
-      <Card className="w-[400px] bg-black text-white rounded-3xl shadow-2xl">
-        <CardBody className="flex flex-col gap-6 p-8">
-          <form onSubmit={handleSendOtp} className="flex flex-col gap-6">
-            <h1 className="text-3xl font-semibold text-center text-white tracking-tight">
+      <Card className="w-[450px] bg-black text-white rounded-2xl shadow-2xl">
+        <CardBody className="flex flex-col gap-6 p-12">
+          <form onSubmit={handleSendOtp} className="flex flex-col gap-10">
+            <h1 className="font-barlow text-2xl font-semibold text-center text-white tracking-tight">
               Sign In
             </h1>
 
@@ -109,7 +103,6 @@ export default function SignIn() {
               label="Email Address"
               type="email"
               size="md"
-              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="text-white"
@@ -123,7 +116,7 @@ export default function SignIn() {
               color="primary"
               radius="sm"
               size="md"
-              className="text-md"
+              className="text-md font-sans"
             >
               Sign In
             </Button>

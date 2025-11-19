@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Spinner, Button, addToast } from "@heroui/react";
+import { Spinner, Button, addToast, Progress } from "@heroui/react";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
 import { AxiosError } from "axios";
@@ -277,10 +277,19 @@ export default function TripDetailsPage() {
     }
   }, [tripId, router]);
 
+  const taxAmount = ((Number(trip?.invoice[0]?.tax) * Number(trip?.invoice[0]?.quotedAmount)) / 100).toFixed(1);
+  const gratuitiesAmount = ((Number(trip?.invoice[0]?.gratuities) * Number(trip?.invoice[0]?.quotedAmount)) / 100).toFixed(1);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-white">
-        <Spinner size="lg" color="primary" />
+         <Progress 
+            isIndeterminate 
+            aria-label="Loading..." 
+            className="max-w-xs w-full " 
+            size="sm"
+            color="primary"
+          />
       </div>
     );
   }
@@ -299,14 +308,14 @@ export default function TripDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-4 sm:px-6 md:px-8 md:py-8 text-white">
+    <div className="min-h-screen px-4 max-w-5xl py-4 sm:px-6 md:px-8 md:py-8 text-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-1 gap-2">
         <button
           onClick={() => router.push(routes.trips)}
-          className="flex items-center gap-1 sm:gap-2 cursor-pointer text-primary font-semibold text-sm sm:text-md"
+          className="font-sans flex items-center gap-1 sm:gap-2 cursor-pointer text-palette-primary font-semibold text-sm sm:text-md"
         >
-          <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+          <ChevronLeft size={20} className="sm:w-5 sm:h-5" />
           <span>BACK</span>
         </button>
 
@@ -315,7 +324,7 @@ export default function TripDetailsPage() {
             <span className="text-neutral-900 h-3 w-3 sm:h-4 sm:w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">
               ✓
             </span>
-            <span className="font-medium text-green-300 text-xs whitespace-nowrap">
+            <span className="font-sans font-medium text-green-300 text-xs whitespace-nowrap">
               Quote Accepted
             </span>
           </div>
@@ -324,7 +333,7 @@ export default function TripDetailsPage() {
 
       <div className="sm:ml-6">
         {/* Title */}
-        <h2 className="text-xl sm:text-2xl md:text-3xl text-primary font-semibold mb-4 md:mb-5">
+        <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold  mb-4 md:mb-5">
           Trip Details
           <span className="block sm:inline mt-1 sm:mt-0"> ({trip.externalTripId})</span>
         </h2>
@@ -408,7 +417,7 @@ export default function TripDetailsPage() {
 
         {/* Customer Details */}
         <div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl text-primary font-semibold mb-6 md:mb-8">
+          <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
             Customer Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">
@@ -418,28 +427,48 @@ export default function TripDetailsPage() {
             <DataCard title="Email" value={trip.email} />
             <DataCard title="Company" value={trip.company} />
           </div>
+          {trip.invoice[0]?.invoiceLink && (
+         <div className="flex justify-end"  >
+         <Button
+            onPress={() => window.open(trip.invoice[0]?.invoiceLink, '_blank')}
+            variant="solid"
+            color="primary"
+            className="font-sans font-bold"
+          >
+            View Invoice
+          </Button>
+         </div>
+          )}
         </div>
 
         <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
 
         {/* Quotation */}
         <div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl text-primary font-semibold mb-6 md:mb-8">
+          <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
             Quotation
           </h2>
-          <div className="flex flex-col">
-            <p className="text-sm sm:text-md text-neutral-400 mb-1">Total Amount</p>
-            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-              <span className="text-xl sm:text-2xl font-bold text-white">
-                CA${Number(trip.invoice[0]?.totalAmount || 0).toFixed(0)}
-              </span>
-              <span className="text-sm sm:text-base text-neutral-400">
-                = CA${Number(trip.invoice[0]?.quotedAmount || 0).toFixed(0)} plus{" "}
-                {Number(trip.invoice[0]?.tax || 0).toFixed(0)}% Tax plus{" "}
-                {Number(trip.invoice[0]?.gratuities || 0).toFixed(0)}% Gratuities
-              </span>
-            </div>
-          </div>
+          <table className="w-100 text-md">
+          <tbody>
+            <tr>
+              <td className="text-neutral-400">Subtotal:</td>
+              <td className="font-semibold">${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}</td>
+            </tr>
+            <tr>
+              <td className="text-neutral-400">Taxes:</td>
+              <td className="font-semibold">${taxAmount}</td>
+            </tr>
+            <tr>
+              <td className="text-neutral-400">Gratuities:</td>
+              <td className="font-semibold">${gratuitiesAmount}</td>
+            </tr>
+            <tr>
+              <td className="text-neutral-400">Total:</td>
+              <td className="font-semibold">CA${Number(trip.invoice[0]?.totalAmount).toFixed(1)}</td>
+            </tr>
+          </tbody>
+        </table>
+
         </div>
 
         <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
@@ -447,7 +476,7 @@ export default function TripDetailsPage() {
         {/* Driver Details */}
         {trip.driver?.[0]?.driverName && (
           <div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl text-primary font-semibold mb-6 md:mb-8">
+            <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
               Driver Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { LogOut, X, UserRound, BusFront } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Modal,
   ModalContent,
@@ -30,6 +30,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const { isOpen: isModalOpen, onOpen, onOpenChange } = useDisclosure();
   const [user, setUser] = useState<User | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -89,12 +90,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
       : "User";
 
+    const isActive = (path: string) => pathname === path;
+
   return (
     <>
 
       {/* Mobile Sidebar (Full Screen Overlay) */}
       <aside
-        className={`fixed left-0 top-0 z-50 h-screen w-80 bg-neutral-900 border-r border-neutral-800 transform transition-transform duration-300 ease-in-out flex flex-col lg:hidden ${
+        className={`font-sans fixed left-0 top-0 z-50 h-screen w-80 bg-neutral-900 border-r border-neutral-800 transform transition-transform duration-300 ease-in-out flex flex-col lg:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -129,7 +132,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <button
               key={item.name}
               onClick={() => handleNavigation(item.path)}
-              className="flex cursor-pointer items-center gap-3 text-zinc-300 hover:bg-neutral-800 hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition"
+              className={`flex cursor-pointer items-center gap-3 text-white hover:bg-neutral-800 hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition ${
+                isActive(item.path)
+                  ? "text-palette-primary" // Active state
+                  : "text-zinc-300 hover:bg-neutral-800 hover:text-white" // Inactive state
+              }`}
             >
               {item.icon}
               {item.name}
@@ -148,22 +155,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </aside>
 
       {/* Desktop Sidebar Box */}
-      <div className="hidden lg:block lg:w-2/3 h-fit mt-10">
+      <div className="hidden font-sans lg:block lg:w-80 h-fit mt-10">
         <div className="bg-black border border-neutral-800 rounded-3xl overflow-hidden">
           {/* User Profile Section */}
           <div className="p-6 border-b border-dashed border-neutral-700">
-            <div className="flex items-center gap-4">
-              <Avatar
-                className="bg-neutral-700 text-white text-xl"
-                name={initials}
-                size="lg"
-              />
-              <div className="flex-1 min-w-0">
+            
+              <div className="ml-2">
                 <p className="text-white font-medium truncate">{fullName}</p>
                 <p className="text-zinc-400 text-sm truncate">
                   {user?.email || "user@example.com"}
                 </p>
-              </div>
             </div>
           </div>
 
@@ -174,7 +175,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <button
                 key={item.name}
                 onClick={() => handleNavigation(item.path)}
-                className="flex cursor-pointer w-full items-center gap-3 text-zinc-300 hover:bg-neutral-800 hover:text-white rounded-xl px-4 py-3 text-sm font-medium transition"
+                className={`flex cursor-pointer w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
+                  isActive(item.path)
+                    ? "text-palette-primary" // Active state
+                    : "text-white hover:bg-neutral-800 hover:text-white" // Inactive state
+                }`}
               >
                 {item.icon}
                 {item.name}
@@ -186,7 +191,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
            <div className="p-4 w-full">
              <button
               onClick={onOpen}
-              className="flex w-full cursor-pointer items-center gap-3 text-red-400 hover:bg-neutral-800 hover:text-red-300 rounded-xl px-4 py-3 text-sm font-medium transition"
+              className="flex w-full cursor-pointer items-center gap-3 text-white hover:bg-neutral-800 hover:text-white rounded-xl px-4 py-3 text-sm font-medium transition"
             >
               <LogOut size={18} />
               Logout

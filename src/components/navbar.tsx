@@ -18,7 +18,7 @@ export default function Navbar({ onMenuClick, isMobileMenuOpen }: NavbarProps) {
           isIconOnly
           variant="light"
           className="text-white hover:bg-neutral-900/50 lg:hidden"
-          onClick={onMenuClick}
+          onPress={onMenuClick}
         >
           {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </Button>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Input, Button, addToast, Spinner } from "@heroui/react";
+import { Input, Button, addToast, Progress } from "@heroui/react";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
 import { AxiosError } from "axios";
@@ -88,7 +88,13 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-white">
-        <Spinner size="lg" color="primary" />
+        <Progress
+            isIndeterminate 
+            aria-label="Loading..." 
+            className="max-w-xs w-full " 
+            size="sm"
+            color="primary"
+          />
       </div>
     );
   }
@@ -155,7 +161,7 @@ export default function ProfilePage() {
       );
 
       addToast({
-        title: "Profile Updated ✅",
+        title: "Profile Updated",
         description: "Your profile has been updated successfully.",
         color: "success",
       });
@@ -174,10 +180,10 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen text-white p-4">
-      <section className="rounded-2xl lg:p-6 shadow-lg">
+    <div className="font-sans min-h-screen text-white p-4">
+      <section className="rounded-2xl lg:p-6 shadow-lg xl:w-4/5 w-full">
         <h3 className="text-xl font-semibold mb-6 text-zinc-100">
-          Profile Details
+          Profile
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -278,8 +284,8 @@ export default function ProfilePage() {
             isLoading={saving}
             onPress={handleSave}
             radius="md"
-            size="lg"
-            className="font-medium text-lg"
+            size="md"
+            className="font-medium text-md"
           >
             Save Changes
           </Button>

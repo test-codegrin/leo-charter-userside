@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { Button, Spinner } from "@heroui/react";
+import { Button, Progress, Spinner } from "@heroui/react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
@@ -57,8 +57,13 @@ function ConfirmationContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-6">
-        <Spinner size="lg" color="primary" />
-        <p className="mt-4 text-zinc-400 text-sm">Confirming your booking...</p>
+        <Progress
+            isIndeterminate 
+            aria-label="Loading..." 
+            className="max-w-xs w-full " 
+            size="sm"
+            color="primary"
+          />
       </div>
     );
   }

@@ -73,7 +73,7 @@ export default function VerifyOtp() {
       } else {
         setLoading(false);
         addToast({
-          title: "Invalid OTP ❌",
+          title: "Invalid OTP",
           description: "Please enter the correct OTP or request a new one.",
           color: "danger",
         });
@@ -83,7 +83,7 @@ export default function VerifyOtp() {
       console.error(err);
       setLoading(false);
       addToast({
-        title: "Verification Failed ⚠️",
+        title: "Verification Failed",
         description: err.response?.data?.message || "OTP invalid or expired.",
         color: "danger",
       });
@@ -149,14 +149,14 @@ export default function VerifyOtp() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900">
+    <div className="flex font-sans min-h-screen items-center justify-center dark:bg-neutral-900">
       <Card className="w-full max-w-[400px] mx-4 bg-black text-white rounded-3xl shadow-2xl">
         <CardBody className="flex flex-col gap-6 p-6 sm:p-8 items-center justify-center">
           <form
             onSubmit={handleVerify}
             className="flex flex-col gap-6 w-full items-center"
           >
-            <h1 className="text-2xl sm:text-3xl font-semibold text-center text-white tracking-tight">
+            <h1 className="font-barlow text-2xl sm:text-3xl font-semibold text-center text-white tracking-tight">
               Verify OTP
             </h1>
 

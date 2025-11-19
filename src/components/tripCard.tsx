@@ -71,10 +71,10 @@ export default function TripCard({ trip }: TripCardProps) {
   };
 
   return (
-    <div className="bg-neutral-900 rounded-2xl lg:rounded-3xl overflow-hidden transition-all duration-300 relative">
+    <div className="bg-neutral-900 rounded-2xl lg:rounded-3xl xl:w-4/5 w-full overflow-hidden transition-all duration-300 relative">
        <div className="absolute lg:top-4 lg:right-4 top-2 right-2">
               {trip.isQuoteAccepted === 1 && (
-              <div className="flex items-center lg:w-35 gap-2 text-center bg-green-950 rounded-full px-2 py-1">
+              <div className="flex items-center gap-2 text-center bg-green-950 rounded-full px-2 py-1">
                 <span className=" text-neutral-900 h-4 w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">✓</span>
                 <span className="font-medium text-green-300 lg:text-sm text-xs">Quote Accepted</span>
               </div>
@@ -135,18 +135,18 @@ export default function TripCard({ trip }: TripCardProps) {
             color="default"
             variant="light"
             onPress={() => router.push(`/trips/${trip.id}`)}
-            className="w-full font-semibold text-md text-primary"
+            className="w-full font-semibold text-md text-palette-primary"
           >
             Details
           </Button>
           {trip.invoiceLink && (
             <>
-            <div className="w-1 bg-primary rounded-full md:block hidden"/>
+            <div className="w-0.5 bg-palette-primary opacity-50 rounded-full md:block hidden"/>
             <Button
               color="default"
               variant="light"
               onPress={() => window.open(trip.invoiceLink, "_blank")}
-              className="w-full font-semibold text-md text-primary"
+              className="w-full font-semibold text-md text-palette-primary"
             >
               Invoice
             </Button>
@@ -154,12 +154,12 @@ export default function TripCard({ trip }: TripCardProps) {
           )}
           {trip.receiptUrl && (
             <>
-            <div className="w-1 bg-primary rounded-full md:block hidden"/>
+            <div className="w-0.5 bg-palette-primary opacity-50   rounded-full md:block hidden"/>
             <Button
               color="default"
               variant="light"
               onPress={() => window.open(trip.receiptUrl, "_blank")}
-              className="w-full font-semibold text-md text-primary"
+              className="w-full font-semibold text-md text-palette-primary"
             >
               Payment Receipt
             </Button>
