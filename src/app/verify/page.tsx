@@ -150,7 +150,7 @@ export default function VerifyOtp() {
 
   return (
     <div className="flex font-sans min-h-screen items-center justify-center dark:bg-neutral-900">
-      <Card className="w-full max-w-[400px] mx-4 bg-black text-white rounded-3xl shadow-2xl">
+      <Card className="w-full max-w-[350px] md:max-w-[400px] mx-4 bg-black text-white rounded-3xl shadow-2xl">
         <CardBody className="flex flex-col gap-6 p-6 sm:p-8 items-center justify-center">
           <form
             onSubmit={handleVerify}

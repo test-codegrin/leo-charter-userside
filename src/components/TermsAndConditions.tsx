@@ -148,19 +148,18 @@ export default function TermsAndConditions({ className = "" }: TermsAndCondition
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-md flex gap-2">
-        <p className="leading-relaxed mb-2 text-white">
-          For more information, please visit
-        </p>
-        <a 
-          href="https://www.leocharterservices.com" 
-          className="text-blue-400 underline"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          www.leocharterservices.com
-        </a>
-      </div>
+      <div className="mt-8 text-md leading-relaxed mb-2 text-white">
+  For more information, please visit{" "}
+  <a 
+    href="https://www.leocharterservices.com" 
+    className="text-blue-400 underline"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    www.leocharterservices.com
+  </a>
+</div>
+
     </div>
   );
 }

@@ -296,7 +296,7 @@ export default function TripDetailsPage() {
 
   if (!trip) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-white px-4">
+      <div className="min-h-screen flex overflow-x-hidden flex-col items-center justify-center text-white px-4">
         <h2 className="text-xl font-medium text-zinc-300 mb-2">
           Trip Not Found
         </h2>
@@ -448,22 +448,22 @@ export default function TripDetailsPage() {
           <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
             Quotation
           </h2>
-          <table className="w-100 text-md">
+          <table className="w-full text-md">
           <tbody>
             <tr>
-              <td className="text-neutral-400">Subtotal:</td>
+              <td className="text-neutral-400 w-50">Subtotal:</td>
               <td className="font-semibold">${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}</td>
             </tr>
             <tr>
-              <td className="text-neutral-400">Taxes:</td>
+              <td className="text-neutral-400 w-50">Taxes:</td>
               <td className="font-semibold">${taxAmount}</td>
             </tr>
             <tr>
-              <td className="text-neutral-400">Gratuities:</td>
+              <td className="text-neutral-400 w-50">Gratuities:</td>
               <td className="font-semibold">${gratuitiesAmount}</td>
             </tr>
             <tr>
-              <td className="text-neutral-400">Total:</td>
+              <td className="text-neutral-400 w-50">Total:</td>
               <td className="font-semibold">CA${Number(trip.invoice[0]?.totalAmount).toFixed(1)}</td>
             </tr>
           </tbody>

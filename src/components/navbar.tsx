@@ -30,7 +30,7 @@ export default function Navbar({ onMenuClick, isMobileMenuOpen }: NavbarProps) {
             alt="Leo Charter Services" 
             width={200} 
             height={60}
-            className="object-contain lg:ml-60"
+            className="object-contain 2xl:ml-60 xl:ml-25 lg:ml-1"
           />
         </div>
       </div>
