@@ -111,18 +111,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* User Profile Section */}
         <div className="p-6 border-b border-neutral-800 mt-12">
-          <div className="flex items-center gap-4">
-            <Avatar
-              className="bg-neutral-700 text-white text-xl"
-              name={initials}
-              size="lg"
-            />
-            <div className="flex-1 min-w-0">
+          
+           
+            <div className="ml-2">
               <p className="text-white font-medium truncate">{fullName}</p>
               <p className="text-zinc-400 text-sm truncate">
                 {user?.email || "user@example.com"}
               </p>
-            </div>
+           
           </div>
         </div>
 

@@ -180,8 +180,8 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="font-sans min-h-screen text-white p-4">
-      <section className="rounded-2xl lg:p-6 shadow-lg xl:w-4/5 w-full">
+    <div className="font-sans min-h-screen text-white mt-10">
+      <section className="rounded-2xl w-full">
         <h3 className="text-xl font-semibold mb-6 text-zinc-100">
           Profile
         </h3>

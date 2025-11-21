@@ -41,14 +41,14 @@ export default function DashboardLayout({
       )}
 
       {/* Content Area Below Navbar */}
-      <div className="flex gap-6 p-6">
+      <div className="flex gap-12 p-6 xl:px-65">
         {/* Desktop Sidebar - 30% width */}
-        <div className={`${isLargeScreen ? "w-[30%]" : "hidden"} lg:flex justify-end`}>
+        <div className={`${isLargeScreen ? "" : "hidden"} lg:flex justify-end `}>
           <Sidebar isOpen={true} onClose={() => {}} />
         </div>
 
         {/* Main Content - 70% width on desktop, full width on mobile */}
-        <div className={`flex-1 ${isLargeScreen ? "w-[70%]" : "w-full"}`}>
+        <div className={`flex-1 ${isLargeScreen ? "" : "w-full "} `}>
           {children}
         </div>
       </div>

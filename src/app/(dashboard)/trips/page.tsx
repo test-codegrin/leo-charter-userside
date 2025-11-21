@@ -106,7 +106,7 @@ export default function TripsPage() {
   }
 
   return (
-    <div className="min-h-screen lg:p-8 text-white">
+    <div className="min-h-screen mt-10 text-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-sans font-semibold text-white">Trips</h1>

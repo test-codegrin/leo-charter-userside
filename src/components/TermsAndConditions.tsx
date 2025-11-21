@@ -6,7 +6,7 @@ interface TermsAndConditionsProps {
 
 export default function TermsAndConditions({ className = "" }: TermsAndConditionsProps) {
   return (
-    <div className={`font-sans px-4 py-6 text-neutral-300 ${className}`}>
+    <div className={`font-sans py-6 text-neutral-300 ${className}`}>
       <h2 className="text-md text-white font-semibold mb-2 md:mb-8">
         Terms and Conditions
       </h2>

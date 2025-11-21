@@ -71,8 +71,8 @@ export default function TripCard({ trip }: TripCardProps) {
   };
 
   return (
-    <div className="bg-neutral-900 rounded-2xl lg:rounded-3xl xl:w-4/5 w-full overflow-hidden transition-all duration-300 relative">
-       <div className="absolute lg:top-4 lg:right-4 top-2 right-2">
+    <div className="bg-neutral-900 rounded-2xl lg:rounded-3xl w-full overflow-hidden transition-all duration-300 relative">
+       <div className="absolute lg:top-4 lg:right-4 top-4 right-2">
               {trip.isQuoteAccepted === 1 && (
               <div className="flex items-center gap-2 text-center bg-green-950 rounded-full px-2 py-1">
                 <span className=" text-neutral-900 h-4 w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">✓</span>
