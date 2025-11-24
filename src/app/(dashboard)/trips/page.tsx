@@ -131,7 +131,7 @@ export default function TripsPage() {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-end mt-8 px-2 gap-6">
+      <div className="flex items-center justify-end mt-8 px-2 gap-2 sm:gap-6">
         <span className="text-white font-sans text-sm">Cards per page:</span>
 
         <div className="w-16">
