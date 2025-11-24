@@ -119,7 +119,7 @@ export default function TripsPage() {
   const lastItem = Math.min(page * limit, total);
 
   return (
-    <div className="min-h-screen text-white">
+    <div className=" text-white">
       <div className="flex items-center justify-between mb-7">
         <h1 className="text-xl font-barlow font-semibold">Trips</h1>
       </div>

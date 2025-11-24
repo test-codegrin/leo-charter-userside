@@ -464,9 +464,9 @@ export default function TripDetailsPage() {
         <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
 
         {/* Quotation */}
-        {((trip.invoice[0]?.quotedAmount &&
+        {(trip.invoice[0]?.quotedAmount &&
           trip.invoice[0]?.totalAmount &&
-          taxAmount) ||
+          taxAmount &&
           gratuitiesAmount) && (
           <>
             <div>

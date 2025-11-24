@@ -46,7 +46,7 @@ export default function DashboardLayout({
 
       {/* Centered content wrapper, max 1200px */}
       <div className="w-full flex mt-4 justify-center">
-        <div className="flex gap-16 max-w-[1200px] p-4 sm:p-6 mt-10 w-full">
+        <div className="flex gap-16 max-w-[1200px] p-4 sm:p-6 lg:mt-10 w-full">
           {/* Desktop Sidebar (>=1200) */}
           <div className={isLargeScreen ? "flex justify-end" : "hidden"}>
             <Sidebar isOpen={true} onClose={() => {}} />
