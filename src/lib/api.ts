@@ -71,7 +71,12 @@ export const authAPI = {
   register: (data: RegisterPayload) => api.post("/user/register", data),
   getProfile: (token: string) => api.get("/user/profile", { headers: { Authorization: `Bearer ${token}` } }),
   updateProfile: (payload: Partial<Record<string, string>>, token: string) => api.put("/user/profile", payload, { headers: { Authorization: `Bearer ${token}` } }),
-  getUserTrips: (userId: number, token: string) => api.get(`/user/trips/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
+  getUserTrips: (userId: number, token: string, page: number, limit: number) =>
+  api.get(
+    `/user/trips/${userId}?page=${page}&limit=${limit}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  ),
+
   confirmBooking: (payload: BookingPayload) => api.post(`/invoice/generate-invoice-send/${payload.tripId}`, payload),
   createPaymentIntent: async (payload: {
   amount: number;

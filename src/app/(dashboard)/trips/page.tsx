@@ -1,12 +1,11 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { Spinner, Button, addToast, Progress } from "@heroui/react";
+import { Button, addToast, Progress, Select, SelectItem } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
-import { RefreshCcw } from "lucide-react";
 import TripCard from "@/components/tripCard";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface FleetItem {
   vehicleClass: string;
@@ -47,6 +46,11 @@ interface Trip {
 export default function TripsPage() {
   const [loading, setLoading] = useState(true);
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -63,10 +67,13 @@ export default function TripsPage() {
           router.push(routes.login);
           return;
         }
-
         const user = JSON.parse(userData);
-        const res = await authAPI.getUserTrips(user.userId, token);
+
+        const res = await authAPI.getUserTrips(user.userId, token, page, limit);
+
         setTrips(res.data.data || []);
+        setTotal(res.data.total || 0);
+        setTotalPages(res.data.totalPages || 1);
       } catch (err) {
         console.error("Error loading trips:", err);
         addToast({
@@ -79,19 +86,20 @@ export default function TripsPage() {
       }
     };
 
+    setLoading(true);
     fetchTrips();
-  }, [router]);
+  }, [router, page, limit]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-white">
-         <Progress
-            isIndeterminate 
-            aria-label="Loading..." 
-            className="max-w-xs w-full " 
-            size="sm"
-            color="primary"
-          />
+        <Progress
+          isIndeterminate
+          aria-label="Loading..."
+          className="max-w-xs w-full"
+          size="sm"
+          color="primary"
+        />
       </div>
     );
   }
@@ -99,24 +107,83 @@ export default function TripsPage() {
   if (trips.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-white">
-        <h2 className="text-xl font-medium text-zinc-300 mb-2">No Trips Found</h2>
+        <h2 className="text-xl font-medium text-zinc-300 mb-2">
+          No Trips Found
+        </h2>
         <p className="text-zinc-500 mb-4">You have not booked any trips yet.</p>
       </div>
     );
   }
 
+  const firstItem = total === 0 ? 0 : (page - 1) * limit + 1;
+  const lastItem = Math.min(page * limit, total);
+
   return (
-    <div className="min-h-screen mt-10 text-white">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-sans font-semibold text-white">Trips</h1>
+    <div className="min-h-screen text-white">
+      <div className="flex items-center justify-between mb-7">
+        <h1 className="text-xl font-barlow font-semibold">Trips</h1>
       </div>
 
-      {/* Trip Cards */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {trips.map((trip) => (
           <TripCard key={trip.id} trip={trip} />
         ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-end mt-8 px-2 gap-6">
+        <span className="text-white font-sans text-sm">Cards per page:</span>
+
+        <div className="w-16">
+          <Select
+            className="bg-black text-white"
+            selectedKeys={[String(limit)]}
+            onSelectionChange={(keys) => {
+              const selected = Array.from(keys)[0];
+              setLimit(Number(selected));
+              setPage(1);
+            }}
+            size="sm"
+            aria-label="Cards per page"
+            radius="sm"
+            variant="flat"
+          >
+            {[5, 10, 20].map((n) => (
+              <SelectItem key={n} textValue={n.toString()}>
+                {n}
+              </SelectItem>
+            ))}
+          </Select>
+        </div>
+
+        <div className="text-white font-sans text-sm text-center">
+          {firstItem}-{lastItem} of {total}
+        </div>
+
+        <div className="flex items-center gap-1">
+          <Button
+            size="sm"
+            variant="light"
+            radius="sm"
+            isIconOnly
+            className="bg-black"
+            disabled={page === 1}
+            onPress={() => setPage(page - 1)}
+          >
+            <ChevronLeft color={page === 1 ? "gray" : "white"} size={20}/>
+          </Button>
+          <Button
+            size="sm"
+            variant="light"
+            radius="sm"
+            isIconOnly
+            className="bg-black"
+            disabled={page === totalPages}
+            onPress={() => setPage(page + 1)}
+          >
+            <ChevronRight color={page === totalPages ? "gray" : "white"} size={20}/>
+          </Button>
+        </div>
       </div>
     </div>
   );

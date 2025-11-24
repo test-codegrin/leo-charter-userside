@@ -71,19 +71,20 @@ export default function TripCard({ trip }: TripCardProps) {
   };
 
   return (
-    <div className="bg-neutral-900 rounded-2xl lg:rounded-3xl w-full overflow-hidden transition-all duration-300 relative">
-       <div className="absolute lg:top-4 lg:right-4 top-4 right-2">
+    <div className="bg-palette-bg rounded-2xl w-full overflow-hidden transition-all duration-300 relative">
+       <div className="absolute top-2 right-2">
               {trip.isQuoteAccepted === 1 && (
-              <div className="flex items-center gap-2 text-center bg-green-950 rounded-full px-2 py-1">
-                <span className=" text-neutral-900 h-4 w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">✓</span>
-                <span className="font-medium text-green-300 lg:text-sm text-xs">Quote Accepted</span>
+              <div className="flex items-center gap-2 text-center bg-palette-success-main rounded-full px-2 py-1">
+                <span className=" text-neutral-900 h-3.5 w-3.5 bg-palette-success-light rounded-full font-bold flex text-xs items-center justify-center">✓</span>
+                <span className=" text-palette-success-light font-bold font-sans text-xs">Quote Accepted</span>
               </div>
             )}
             </div>
-      <div className="flex flex-col md:flex-row md:gap-6">
+
+      <div className="flex px-8 pt-8 pb-4 flex-col md:flex-row md:gap-6">
         
         {/* Vehicle Image */}
-        <div className="shrink-0 w-full md:w-64 h-48 rounded-xl flex items-center justify-center overflow-hidden relative p-6">
+        <div className="w-full md:w-44 flex items-center ">
           {vehicle?.vehicleImage ? (
           
               <Image
@@ -101,41 +102,40 @@ export default function TripCard({ trip }: TripCardProps) {
         </div>
 
         {/* Trip Details */}
-        <div className="flex-1 space-y-3 p-6 md:mt-4">
-          {/* Header with Status Badge */}
+        <div className="flex flex-col gap-2">
           
-              <h2 className="md:text-xl text-md font-semibold text-white">
-                {pickup && formatDateTime(pickup.pickUpDate, pickup.pickUpTime)}
-              </h2>
+          <h2 className="md:text-lg text-base font-barlow font-semibold text-white">
+            {pickup && formatDateTime(pickup.pickUpDate, pickup.pickUpTime)}
+          </h2>
           
-
-          <div className="text-white text-sm">
+          <div className="text-white text-sm font-sans">
             {vehicle?.preferedVehicleType || "Vehicle Type Not Specified"} 
           </div>
 
           {/* Service Type */}
-          <div className="flex items-center gap-2">
-            <span className="text-md font-medium text-white md:no-underline underline underline-offset-6 decoration-dotted ">{trip.service}</span>
+          <div className="flex items-center">
+            <span className="text-sm font-sans font-medium text-white ">{trip.service}</span>
           </div>
 
           {/* Location Info */}
           {pickup && (
-            <div className="flex items-center gap-2 text-white mt-5">
+            <div className="flex items-center px-4 py-1.5 text-white">
               <div className="w-3 h-3 bg-white rounded-full mx-2" />
               <div>
-                <p className="font-medium text-white text-md md:no-underline underline underline-offset-6 decoration-dotted">{pickup.pickUpAddress}</p>
+                <p className="font-sans text-white text-sm">{pickup.pickUpAddress}</p>
               </div>
             </div>
           )}
         </div>
       </div>
       
-      <div className="flex md:flex-row flex-col w-full">
+      <div className="flex md:flex-row flex-col px-1.5 py-2 w-full">
         <Button
             color="default"
             variant="light"
             onPress={() => router.push(`/trips/${trip.id}`)}
-            className="w-full font-semibold text-md text-palette-primary"
+            className="w-full font-semibold text-sm font-sans text-palette-primary"
+            size="sm"
           >
             Details
           </Button>
@@ -146,7 +146,8 @@ export default function TripCard({ trip }: TripCardProps) {
               color="default"
               variant="light"
               onPress={() => window.open(trip.invoiceLink, "_blank")}
-              className="w-full font-semibold text-md text-palette-primary"
+              className="w-full font-semibold text-sm font-sans text-palette-primary"
+              size="sm"
             >
               Invoice
             </Button>
@@ -159,7 +160,8 @@ export default function TripCard({ trip }: TripCardProps) {
               color="default"
               variant="light"
               onPress={() => window.open(trip.receiptUrl, "_blank")}
-              className="w-full font-semibold text-md text-palette-primary"
+              className="w-full font-semibold text-sm font-sans text-palette-primary"
+              size="sm"
             >
               Payment Receipt
             </Button>

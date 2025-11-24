@@ -14,6 +14,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const handleResize = () => {
+      // desktop layout from 1200px and up
       const isLarge = window.innerWidth >= 1024;
       setIsLargeScreen(isLarge);
       if (isLarge) {
@@ -27,29 +28,34 @@ export default function DashboardLayout({
   }, []);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen((prev) => !prev);
   };
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navbar - Sticky at Top with Blur Effect */}
+      {/* Navbar */}
       <Navbar onMenuClick={toggleSidebar} isMobileMenuOpen={isSidebarOpen} />
 
-      {/* Mobile Sidebar */}
-      {isLargeScreen ? null: (
-        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      {/* Mobile Sidebar (<1200) */}
+      {!isLargeScreen && (
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
       )}
 
-      {/* Content Area Below Navbar */}
-      <div className="flex gap-12 p-6 xl:px-65">
-        {/* Desktop Sidebar - 30% width */}
-        <div className={`${isLargeScreen ? "" : "hidden"} lg:flex justify-end `}>
-          <Sidebar isOpen={true} onClose={() => {}} />
-        </div>
+      {/* Centered content wrapper, max 1200px */}
+      <div className="w-full flex mt-4 justify-center">
+        <div className="flex gap-16 max-w-[1200px] p-4 sm:p-6 mt-10 w-full">
+          {/* Desktop Sidebar (>=1200) */}
+          <div className={isLargeScreen ? "flex justify-end" : "hidden"}>
+            <Sidebar isOpen={true} onClose={() => {}} />
+          </div>
 
-        {/* Main Content - 70% width on desktop, full width on mobile */}
-        <div className={`flex-1 ${isLargeScreen ? "" : "w-full "} `}>
-          {children}
+          {/* Main Content */}
+          <div className={isLargeScreen ? "flex-1" : "flex-1 w-full"}>
+            {children}
+          </div>
         </div>
       </div>
     </div>

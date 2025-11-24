@@ -126,17 +126,23 @@ export default function TripDetailsPage() {
     const month = dateObj.toLocaleDateString("en-US", { month: "long" });
     const day = dateObj.getDate();
     const year = dateObj.getFullYear();
-    
-    const suffix = 
-      day === 1 || day === 21 || day === 31 ? "st" :
-      day === 2 || day === 22 ? "nd" :
-      day === 3 || day === 23 ? "rd" : "th";
 
-    const formattedTime = dateObj.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    }).toLowerCase();
+    const suffix =
+      day === 1 || day === 21 || day === 31
+        ? "st"
+        : day === 2 || day === 22
+        ? "nd"
+        : day === 3 || day === 23
+        ? "rd"
+        : "th";
+
+    const formattedTime = dateObj
+      .toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .toLowerCase();
 
     return `${dayName}, ${month} ${day}${suffix}, ${year} - ${formattedTime}`;
   };
@@ -277,19 +283,26 @@ export default function TripDetailsPage() {
     }
   }, [tripId, router]);
 
-  const taxAmount = ((Number(trip?.invoice[0]?.tax) * Number(trip?.invoice[0]?.quotedAmount)) / 100).toFixed(1);
-  const gratuitiesAmount = ((Number(trip?.invoice[0]?.gratuities) * Number(trip?.invoice[0]?.quotedAmount)) / 100).toFixed(1);
+  const taxAmount = (
+    (Number(trip?.invoice[0]?.tax) * Number(trip?.invoice[0]?.quotedAmount)) /
+    100
+  ).toFixed(1);
+  const gratuitiesAmount = (
+    (Number(trip?.invoice[0]?.gratuities) *
+      Number(trip?.invoice[0]?.quotedAmount)) /
+    100
+  ).toFixed(1);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-white">
-         <Progress 
-            isIndeterminate 
-            aria-label="Loading..." 
-            className="max-w-xs w-full " 
-            size="sm"
-            color="primary"
-          />
+        <Progress
+          isIndeterminate
+          aria-label="Loading..."
+          className="max-w-xs w-full "
+          size="sm"
+          color="primary"
+        />
       </div>
     );
   }
@@ -308,46 +321,45 @@ export default function TripDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 max-w-5xl py-4 sm:px-6 md:px-8 md:py-8 text-white">
+    <div className="min-h-screen text-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-1 gap-2">
         <button
           onClick={() => router.push(routes.trips)}
-          className="font-sans flex items-center gap-1 sm:gap-2 cursor-pointer text-palette-primary font-semibold text-sm sm:text-md"
+          className="font-sans flex items-center gap-1 sm:gap-2 cursor-pointer text-palette-primary font-semibold text-sm sm:text-base"
         >
           <ChevronLeft size={20} className="sm:w-5 sm:h-5" />
           <span>BACK</span>
         </button>
 
         {trip.isQuoteAccepted === 1 && (
-          <div className="flex items-center gap-1 sm:gap-2 text-center bg-green-950 rounded-full px-2 py-1">
-            <span className="text-neutral-900 h-3 w-3 sm:h-4 sm:w-4 bg-green-300 rounded-full font-bold flex text-xs items-center justify-center">
-              ✓
-            </span>
-            <span className="font-sans font-medium text-green-300 text-xs whitespace-nowrap">
-              Quote Accepted
-            </span>
-          </div>
+          <div className="flex items-center gap-2 text-center bg-palette-success-main rounded-full px-2 py-1">
+                <span className=" text-neutral-900 h-3.5 w-3.5 bg-palette-success-light rounded-full font-bold flex text-xs items-center justify-center">✓</span>
+                <span className=" text-palette-success-light font-bold font-sans text-xs">Quote Accepted</span>
+              </div>
         )}
       </div>
 
-      <div className="sm:ml-6">
+      <div className="ml-4 sm:ml-6">
         {/* Title */}
         <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold  mb-4 md:mb-5">
           Trip Details
-          <span className="block sm:inline mt-1 sm:mt-0"> ({trip.externalTripId})</span>
+          <span className="block sm:inline mt-1 sm:mt-0">
+            {" "}
+            ({trip.externalTripId})
+          </span>
         </h2>
-        
+
         {/* Itinerary Section */}
         <div className="relative mb-6 md:mb-8">
           {/* Vertical connecting line */}
-          <div className="absolute top-6 sm:top-7 left-[7px] w-[2px] bg-neutral-600 h-[calc(100%-4.5rem)] sm:h-[calc(100%-5.4rem)]" />
-          
-          <div className="flex flex-col gap-4 sm:gap-6 relative">
+          <div className="absolute mt-5 top-6 sm:top-7 left-[5px] w-[2px] bg-divider h-[calc(100%-5.5rem)] sm:h-[calc(100%-6rem)]" />
+
+          <div className="flex flex-col relative">
             {/* Pickup */}
             {trip.itineraries?.[0]?.pickup?.map((pickup: Pickup) => (
-              <div className="flex items-start gap-3 sm:gap-5" key={pickup.itineraryId}>
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-300 rounded-full mt-1 z-10 flex-shrink-0" />
+              <div className="flex items-start gap-2" key={pickup.itineraryId}>
+                <div className="w-3 h-3 mt-7 sm:w-3 sm:h-3 bg-gray-300 rounded-full z-10" />
                 <DataCard title="Pickup Address" value={pickup.pickups} />
               </div>
             ))}
@@ -357,12 +369,12 @@ export default function TripDetailsPage() {
               <>
                 {trip.stops.map((stop: Stop, index: number) => (
                   <div
-                    className="flex items-start gap-3 sm:gap-5 ml-6 sm:ml-9"
+                    className="flex items-start ml-5 sm:ml-9"
                     key={stop.stopId}
                   >
-                    <DataCard 
-                      title={`Stop ${index + 1} : ${stop.stopName}`} 
-                      value={stop.address} 
+                    <DataCard
+                      title={`Stop ${index + 1} : ${stop.stopName}`}
+                      value={stop.address}
                     />
                   </div>
                 ))}
@@ -371,8 +383,8 @@ export default function TripDetailsPage() {
 
             {/* Dropoff */}
             {trip.itineraries?.[0]?.dropoff?.map((dropoff: Dropoff) => (
-              <div className="flex items-start gap-3 sm:gap-5" key={dropoff.itineraryId}>
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-300 mt-1 z-10 flex-shrink-0" />
+              <div className="flex items-start gap-2 " key={dropoff.itineraryId}>
+                <div className="w-3 h-3 sm:w-3 sm:h-3 bg-gray-300 mt-7 z-10" />
                 <DataCard title="Dropoff Address" value={dropoff.dropoffs} />
               </div>
             ))}
@@ -380,40 +392,46 @@ export default function TripDetailsPage() {
         </div>
 
         {/* Trip Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 ">
           <DataCard title="Service Type" value={trip.serviceOption} />
-          <DataCard 
-            title="Pickup Date and Time" 
+          <DataCard
+            title="Pickup Date and Time"
             value={formatDateTime(
-              trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate, 
+              trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate,
               trip.itineraries?.[0]?.pickup?.[0]?.pickUpTime
-            )} 
+            )}
           />
-          <DataCard 
-            title="Return Date and Time" 
+          <DataCard
+            title="Return Date and Time"
             value={formatDateTime(
-              trip.itineraries?.[0]?.dropoff?.[0]?.returnDate, 
+              trip.itineraries?.[0]?.dropoff?.[0]?.returnDate,
               trip.itineraries?.[0]?.dropoff?.[0]?.returnTime
-            )} 
+            )}
           />
           <DataCard title="Function" value={trip.functions} />
-          <DataCard title="Number of Passengers" value={trip.numberOfPassengers} />
-          <DataCard title="Vehicle Class" value={trip.fleet?.[0]?.vehicleClass} />
-          <DataCard 
-            title="Preferred Vehicle" 
-            value={trip.fleet?.[0]?.preferedVehicleType} 
-            className="md:col-span-2" 
+          <DataCard
+            title="Number of Passengers"
+            value={trip.numberOfPassengers}
           />
-          <DataCard 
-            title="Note to us" 
-            value={trip.noteToUs} 
-            className="md:col-span-2" 
+          <DataCard
+            title="Vehicle Class"
+            value={trip.fleet?.[0]?.vehicleClass}
+          />
+          <DataCard
+            title="Preferred Vehicle"
+            value={trip.fleet?.[0]?.preferedVehicleType}
+            className="md:col-span-2"
+          />
+          <DataCard
+            title="Note to us"
+            value={trip.noteToUs}
+            className="md:col-span-2"
           />
           <DataCard title="Promo Code" value={""} />
         </div>
-        
+
         {/* Divider */}
-        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
+        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
 
         {/* Customer Details */}
         <div>
@@ -428,50 +446,62 @@ export default function TripDetailsPage() {
             <DataCard title="Company" value={trip.company} />
           </div>
           {trip.invoice[0]?.invoiceLink && (
-         <div className="flex justify-end"  >
-         <Button
-            onPress={() => window.open(trip.invoice[0]?.invoiceLink, '_blank')}
-            variant="solid"
-            color="primary"
-            className="font-sans font-bold"
-          >
-            View Invoice
-          </Button>
-         </div>
+            <div className="flex justify-end">
+              <Button
+                onPress={() =>
+                  window.open(trip.invoice[0]?.invoiceLink, "_blank")
+                }
+                variant="solid"
+                color="primary"
+                className="font-sans font-bold"
+              >
+                View Invoice
+              </Button>
+            </div>
           )}
         </div>
 
-        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
+        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
 
         {/* Quotation */}
-        <div>
-          <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
-            Quotation
-          </h2>
-          <table className="w-full text-md">
-          <tbody>
-            <tr>
-              <td className="text-neutral-400 w-50">Subtotal:</td>
-              <td className="font-semibold">${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}</td>
-            </tr>
-            <tr>
-              <td className="text-neutral-400 w-50">Taxes:</td>
-              <td className="font-semibold">${taxAmount}</td>
-            </tr>
-            <tr>
-              <td className="text-neutral-400 w-50">Gratuities:</td>
-              <td className="font-semibold">${gratuitiesAmount}</td>
-            </tr>
-            <tr>
-              <td className="text-neutral-400 w-50">Total:</td>
-              <td className="font-semibold">CA${Number(trip.invoice[0]?.totalAmount).toFixed(1)}</td>
-            </tr>
-          </tbody>
-        </table>
+        {((trip.invoice[0]?.quotedAmount &&
+          trip.invoice[0]?.totalAmount &&
+          taxAmount) ||
+          gratuitiesAmount) && (
+          <>
+            <div>
+              <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
+                Quotation
+              </h2>
+              <table className="w-full text-base">
+                <tbody>
+                  <tr>
+                    <td className="text-neutral-400 w-50">Subtotal:</td>
+                    <td className="font-semibold">
+                      ${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="text-neutral-400 w-50">Taxes:</td>
+                    <td className="font-semibold">${taxAmount}</td>
+                  </tr>
+                  <tr>
+                    <td className="text-neutral-400 w-50">Gratuities:</td>
+                    <td className="font-semibold">${gratuitiesAmount}</td>
+                  </tr>
+                  <tr>
+                    <td className="text-neutral-400 w-50">Total:</td>
+                    <td className="font-semibold">
+                      CA${Number(trip.invoice[0]?.totalAmount).toFixed(1)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-        </div>
-
-        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
+            <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+          </>
+        )}
 
         {/* Driver Details */}
         {trip.driver?.[0]?.driverName && (
@@ -480,23 +510,23 @@ export default function TripDetailsPage() {
               Driver Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">
-              <DataCard 
-                title="First Name" 
-                value={trip.driver[0]?.driverName?.split(" ")?.[0] ?? "N/A"} 
+              <DataCard
+                title="First Name"
+                value={trip.driver[0]?.driverName?.split(" ")?.[0] ?? "N/A"}
               />
-              <DataCard 
-                title="Last Name" 
-                value={trip.driver[0]?.driverName?.split(" ")?.[1] ?? "N/A"} 
+              <DataCard
+                title="Last Name"
+                value={trip.driver[0]?.driverName?.split(" ")?.[1] ?? "N/A"}
               />
-              <DataCard 
-                title="Phone Number" 
-                value={trip.driver[0]?.phoneNo ?? "N/A"} 
+              <DataCard
+                title="Phone Number"
+                value={trip.driver[0]?.phoneNo ?? "N/A"}
               />
             </div>
-            <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-neutral-700 w-full" />
+            <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
           </div>
         )}
-        
+
         {/* Terms and Conditions */}
         <TermsAndConditions />
       </div>

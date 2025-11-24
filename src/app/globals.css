@@ -11,6 +11,11 @@
   --foreground: #171717;
   --color-primary: #a48d56;
   --color-palette-primary: #D9C4A6;
+  --color-palette-secondary: #919EAB;
+  --color-palette-bg: #202020;
+  --palette-success-light: #77ED8B;
+  --palette-success-main: #22C55E29;
+  --color-divider: #919eab33;
 }
 
 @theme inline {
@@ -18,6 +23,11 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--color-primary);
   --color-palette-primary: var(--color-palette-primary);
+  --color-palette-secondary: var(--color-palette-secondary);
+  --color-palette-bg: var(--color-palette-bg);
+  --color-palette-success-light: var(--palette-success-light);
+  --color-palette-success-main: var(--palette-success-main);
+  --color-divider: var(--color-divider);
   --font-barlow: var(--font-barlow);
   --font-sans: var(--font-public-sans);
 }

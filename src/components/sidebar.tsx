@@ -151,22 +151,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </aside>
 
       {/* Desktop Sidebar Box */}
-      <div className="hidden font-sans lg:block lg:w-80 h-fit mt-10">
-        <div className="bg-black border border-neutral-800 rounded-3xl overflow-hidden">
+      <div className="hidden font-sans lg:block lg:w-70 h-fit">
+        <div className="bg-black border border-divider rounded-2xl overflow-hidden">
           {/* User Profile Section */}
-          <div className="p-6 border-b border-dashed border-neutral-700">
+          <div className="px-6 pt-6 pb-4 border-b border-dashed border-divider">
             
-              <div className="ml-2">
-                <p className="text-white font-medium truncate">{fullName}</p>
-                <p className="text-zinc-400 text-sm truncate">
+              
+                <p className="text-white font-medium truncate text-base mb-1">{fullName}</p>
+                <p className="text-zinc-400  truncate text-sm">
                   {user?.email || "user@example.com"}
                 </p>
-            </div>
           </div>
 
           {/* Navigation Menu */}
           <nav className="flex flex-col">
-            <div className="p-4 gap-2 w-full border-b border-dashed border-neutral-700">
+            <div className="px-4 py-2
+             gap-2 w-full border-b border-dashed border-divider">
               {menuItems.map((item) => (
               <button
                 key={item.name}
@@ -184,7 +184,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
 
             {/* Logout Button */}
-           <div className="p-4 w-full">
+           <div className="px-4 py-2 w-full">
              <button
               onClick={onOpen}
               className="flex w-full cursor-pointer items-center gap-3 text-white hover:bg-neutral-800 hover:text-white rounded-xl px-4 py-3 text-sm font-medium transition"
@@ -224,7 +224,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   </Button>
 
                   <Button
-                    color="danger"
+                    color="primary"
                     onPress={() => handleConfirmLogout(onCloseModal)}
                   >
                     Logout
