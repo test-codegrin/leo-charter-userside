@@ -191,7 +191,7 @@ export default function ProfilePage() {
             value={form.firstName}
             onChange={(e) => handleChange("firstName", e.target.value)}
             label="First Name"
-            placeholder="First Name"
+            
             size="lg"
             radius="md"
             variant="flat"
@@ -200,7 +200,7 @@ export default function ProfilePage() {
             value={form.lastName}
             onChange={(e) => handleChange("lastName", e.target.value)}
             label="Last Name"
-            placeholder="Last Name"
+           
             size="lg"
             radius="md"
             variant="flat"
@@ -211,7 +211,7 @@ export default function ProfilePage() {
             value={form.email}
             onChange={(e) => handleChange("email", e.target.value)}
             label="Email"
-            placeholder="Email"
+        
             size="lg"
             radius="md"
             variant="flat"
@@ -221,7 +221,7 @@ export default function ProfilePage() {
             value={form.phoneNo}
             onChange={(e) => handleChange("phoneNo", e.target.value)}
             label="Phone number"
-            placeholder="Phone number"
+           
             size="lg"
             radius="md"
             variant="flat"
@@ -231,7 +231,7 @@ export default function ProfilePage() {
             value={form.address}
             onChange={(e) => handleChange("address", e.target.value)}
             label="Address"
-            placeholder="Address"
+            
             size="lg"
             radius="md"
             variant="flat"
@@ -241,7 +241,7 @@ export default function ProfilePage() {
             value={form.cityName}
             onChange={(e) => handleChange("cityName", e.target.value)}
             label="City"
-            placeholder="City"
+           
             size="lg"
             radius="md"
             variant="flat"
@@ -250,7 +250,7 @@ export default function ProfilePage() {
           <Input
             value={form.provinceName}
             onChange={(e) => handleChange("provinceName", e.target.value)}
-            placeholder="Province"
+           
             label="Province"
             size="lg"
             radius="md"
@@ -260,7 +260,7 @@ export default function ProfilePage() {
           <Input
             value={form.postalCode}
             onChange={(e) => handleChange("postalCode", e.target.value)}
-            placeholder="Postal Code"
+            
             label="Postal Code"
             size="lg"
             radius="md"
@@ -270,7 +270,7 @@ export default function ProfilePage() {
           <Input
             value={form.company}
             onChange={(e) => handleChange("company", e.target.value)}
-            placeholder="Company"
+          
             label="Company"
             size="lg"
             radius="md"

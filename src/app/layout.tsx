@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${barlow.variable} ${publicSans.variable}  dark text-foreground antialiased`}
+        className={`${barlow.variable} ${publicSans.variable}  dark bg-black text-foreground antialiased`}
       >
         <Providers> {children}</Providers>  
       </body>
