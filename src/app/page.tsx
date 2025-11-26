@@ -88,7 +88,7 @@ export default function SignIn() {
 
   return (
     <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900 relative">
-      <Image src="/assets/leo.png" alt="Leo Charter Services" width={200} height={60} className="absolute top-4 left-4"/>
+      <Image src="/leo.png" alt="Leo Charter Services" width={200} height={60} className="absolute top-4 left-4"/>
       <Card className="w-[350px] md:w-[450px] bg-black text-white rounded-2xl shadow-2xl">
         <CardBody className="flex flex-col gap-6 p-6 md:p-12">
           <form onSubmit={handleSendOtp} className="flex flex-col gap-7">

@@ -73,7 +73,7 @@ function ConfirmationContent() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-6 text-center">
         <Image
-          src="/assets/leo.png"
+          src="/leo.png"
           alt="Leo Charter Logo"
           width={250}
           height={100}
@@ -94,7 +94,7 @@ function ConfirmationContent() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-6">
       <Image
-        src="/assets/leo.png"
+        src="/leo.png"
         alt="Leo Charter Logo"
         width={250}
         height={100}
