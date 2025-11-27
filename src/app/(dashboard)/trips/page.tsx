@@ -39,6 +39,7 @@ interface Trip {
   updated_at: string;
   fleet: FleetItem[];
   itinerary: Itinerary;
+  invoiceTitle: string; 
   invoiceLink: string;
   receiptUrl: string;
 }
@@ -71,9 +72,21 @@ export default function TripsPage() {
 
         const res = await authAPI.getUserTrips(user.userId, token, page, limit);
 
-        setTrips(res.data.data || []);
-        setTotal(res.data.total || 0);
-        setTotalPages(res.data.totalPages || 1);
+        // ✅ Deduplicate trips by ID
+        const rawTrips = res.data.data || [];
+        const uniqueTripsMap = new Map<number, Trip>();
+        
+        rawTrips.forEach((trip: Trip) => {
+          if (!uniqueTripsMap.has(trip.id)) {
+            uniqueTripsMap.set(trip.id, trip);
+          }
+        });
+
+        const uniqueTrips = Array.from(uniqueTripsMap.values());
+
+        setTrips(uniqueTrips);
+        setTotal(uniqueTrips.length); // Use deduplicated count
+        setTotalPages(Math.ceil(uniqueTrips.length / limit));
       } catch (err) {
         console.error("Error loading trips:", err);
         addToast({

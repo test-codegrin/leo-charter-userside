@@ -3,7 +3,7 @@
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { Button, Chip, Divider } from "@heroui/react";
 import Image from "next/image";
-import { useRouter } from "next/navigation"; // ✅ Changed import
+import { useRouter } from "next/navigation";
 import { routes } from "@/lib/routes";
 
 interface FleetItem {
@@ -33,6 +33,7 @@ interface Trip {
   fleet: FleetItem[];
   itinerary: Itinerary;
   created_at: string;
+  invoiceTitle: string;
   invoiceLink: string;
   receiptUrl: string;
 }
@@ -42,10 +43,11 @@ interface TripCardProps {
 }
 
 export default function TripCard({ trip }: TripCardProps) {
-  const router = useRouter(); // ✅ Use the hook inside the component
+  const router = useRouter();
   const pickup = trip.itinerary.pickups[0];
   const dropoff = trip.itinerary.dropoffs[0];
   const vehicle = trip.fleet[0];
+  const hasMultipleFleets = trip.fleet && trip.fleet.length > 1;
 
   // Format date like "Thursday, November 20th, 2025 - 1:15am"
   const formatDateTime = (date: string, time: string) => {
@@ -72,30 +74,27 @@ export default function TripCard({ trip }: TripCardProps) {
 
   return (
     <div className="bg-palette-bg rounded-2xl w-full overflow-hidden transition-all duration-300 relative">
-       <div className="absolute top-2 right-2">
-              {trip.isQuoteAccepted === 1 && (
-              <div className="flex items-center gap-2 text-center bg-palette-success-main rounded-full px-2 py-1">
-                <span className=" text-neutral-900 h-3.5 w-3.5 bg-palette-success-light rounded-full font-bold flex text-xs items-center justify-center">✓</span>
-                <span className=" text-palette-success-light font-bold font-sans text-xs">Quote Accepted</span>
-              </div>
-            )}
-            </div>
+      <div className="absolute top-2 right-2">
+        {trip.isQuoteAccepted === 1 && (
+          <div className="flex items-center gap-2 text-center bg-palette-success-main rounded-full px-2 py-1">
+            <span className=" text-neutral-900 h-3.5 w-3.5 bg-palette-success-light rounded-full font-bold flex text-xs items-center justify-center">✓</span>
+            <span className=" text-palette-success-light font-bold font-sans text-xs">Quote Accepted</span>
+          </div>
+        )}
+      </div>
 
       <div className="flex px-8 pt-8 pb-4 flex-col md:flex-row md:gap-6">
         
-        {/* Vehicle Image */}
+        {/* Vehicle Image - Always show first fleet's image */}
         <div className="w-full md:w-44 flex items-center ">
           {vehicle?.vehicleImage ? (
-          
-              <Image
+            <Image
               src={vehicle.vehicleImage}
               alt={vehicle.preferedVehicleType || "Vehicle"}
               className="object-contain"
               width={500}
               height={100}
             />
-           
-        
           ) : (
             <div className="text-zinc-600">No Image</div>
           )}
@@ -105,12 +104,23 @@ export default function TripCard({ trip }: TripCardProps) {
         <div className="flex flex-col gap-2">
           
           <h2 className="md:text-lg text-base font-barlow font-semibold text-white">
-            {pickup && formatDateTime(pickup.pickUpDate, pickup.pickUpTime)}
+            {trip.invoiceTitle || formatDateTime(pickup.pickUpDate, pickup.pickUpTime)}
           </h2>
           
-          <div className="text-white text-sm font-sans">
-            {vehicle?.preferedVehicleType || "Vehicle Type Not Specified"} 
-          </div>
+          {/* Vehicle Type(s) - Always show all */}
+          {hasMultipleFleets ? (
+            <div className="flex flex-col gap-1">
+              {trip.fleet.map((fleetItem, index) => (
+                <div key={index} className="text-white text-sm font-sans">
+                  {fleetItem.preferedVehicleType || "Vehicle Type Not Specified"}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-white text-sm font-sans">
+              {vehicle?.preferedVehicleType || "Vehicle Type Not Specified"} 
+            </div>
+          )}
 
           {/* Service Type */}
           <div className="flex items-center">
@@ -131,16 +141,16 @@ export default function TripCard({ trip }: TripCardProps) {
       
       <div className="flex md:flex-row flex-col px-1.5 py-2 w-full">
         <Button
-            color="default"
-            variant="light"
-            onPress={() => router.push(`/trips/${trip.id}`)}
-            className="w-full font-semibold text-sm font-sans text-palette-primary"
-            size="sm"
-          >
-            Details
-          </Button>
-          {trip.invoiceLink && (
-            <>
+          color="default"
+          variant="light"
+          onPress={() => router.push(`/trips/${trip.id}`)}
+          className="w-full font-semibold text-sm font-sans text-palette-primary"
+          size="sm"
+        >
+          Details
+        </Button>
+        {trip.invoiceLink && (
+          <>
             <div className="w-0.5 bg-palette-primary opacity-50 rounded-full md:block hidden"/>
             <Button
               color="default"
@@ -151,11 +161,11 @@ export default function TripCard({ trip }: TripCardProps) {
             >
               Invoice
             </Button>
-            </>
-          )}
-          {trip.receiptUrl && (
-            <>
-            <div className="w-0.5 bg-palette-primary opacity-50   rounded-full md:block hidden"/>
+          </>
+        )}
+        {trip.receiptUrl && (
+          <>
+            <div className="w-0.5 bg-palette-primary opacity-50 rounded-full md:block hidden"/>
             <Button
               color="default"
               variant="light"
@@ -165,9 +175,9 @@ export default function TripCard({ trip }: TripCardProps) {
             >
               Payment Receipt
             </Button>
-            </>
-          )}
-       </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
