@@ -34,7 +34,7 @@ export default function TermsAndConditions({ className = "" }: TermsAndCondition
       {/* Section 4 */}
       <div className="mb-2">
         <p className=" text-sm text-palette-secondary">
-          <span className=" text-palette-secondary">4.</span> Payment Methods: We accept online payments by debit card, credit card or e-transfer. For other payment options, such as e-transfer or EFT, please contact{" "}
+          <span className=" text-palette-secondary">4.</span> Payment Methods: We accept online payments by debit card, or a credit card. For other payment options, such as e-transfer or EFT,{" "} please contact {" "}
           <a 
             href="mailto:info@leocharterservices.com" 
             className="text-blue-500"

@@ -56,7 +56,7 @@ function ConfirmationContent() {
   // ✅ Loader State
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-6">
+      <div className="min-h-96 flex flex-col items-center justify-center bg-black text-white px-6">
         <Progress
             isIndeterminate 
             aria-label="Loading..." 

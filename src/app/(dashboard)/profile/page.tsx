@@ -87,14 +87,14 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-white">
+      <div className="flex items-center justify-center min-h-96 text-white">
         <Progress
-            isIndeterminate 
-            aria-label="Loading..." 
+          isIndeterminate
+          aria-label="Loading..."
             className="max-w-xs w-full " 
-            size="sm"
-            color="primary"
-          />
+          size="sm"
+          color="primary"
+        />
       </div>
     );
   }
@@ -182,16 +182,13 @@ export default function ProfilePage() {
   return (
     <div className="font-sans min-h-screen text-white ">
       <section className="rounded-2xl w-full">
-        <h3 className="text-xl font-semibold mb-6 text-zinc-100">
-          Profile
-        </h3>
+        <h3 className="text-xl font-semibold mb-6 text-zinc-100">Profile</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
             value={form.firstName}
             onChange={(e) => handleChange("firstName", e.target.value)}
             label="First Name"
-            
             size="lg"
             radius="md"
             variant="flat"
@@ -200,7 +197,6 @@ export default function ProfilePage() {
             value={form.lastName}
             onChange={(e) => handleChange("lastName", e.target.value)}
             label="Last Name"
-           
             size="lg"
             radius="md"
             variant="flat"
@@ -211,7 +207,6 @@ export default function ProfilePage() {
             value={form.email}
             onChange={(e) => handleChange("email", e.target.value)}
             label="Email"
-        
             size="lg"
             radius="md"
             variant="flat"
@@ -221,7 +216,6 @@ export default function ProfilePage() {
             value={form.phoneNo}
             onChange={(e) => handleChange("phoneNo", e.target.value)}
             label="Phone number"
-           
             size="lg"
             radius="md"
             variant="flat"
@@ -231,7 +225,6 @@ export default function ProfilePage() {
             value={form.address}
             onChange={(e) => handleChange("address", e.target.value)}
             label="Address"
-            
             size="lg"
             radius="md"
             variant="flat"
@@ -241,7 +234,6 @@ export default function ProfilePage() {
             value={form.cityName}
             onChange={(e) => handleChange("cityName", e.target.value)}
             label="City"
-           
             size="lg"
             radius="md"
             variant="flat"
@@ -250,7 +242,6 @@ export default function ProfilePage() {
           <Input
             value={form.provinceName}
             onChange={(e) => handleChange("provinceName", e.target.value)}
-           
             label="Province"
             size="lg"
             radius="md"
@@ -260,7 +251,6 @@ export default function ProfilePage() {
           <Input
             value={form.postalCode}
             onChange={(e) => handleChange("postalCode", e.target.value)}
-            
             label="Postal Code"
             size="lg"
             radius="md"
@@ -270,7 +260,6 @@ export default function ProfilePage() {
           <Input
             value={form.company}
             onChange={(e) => handleChange("company", e.target.value)}
-          
             label="Company"
             size="lg"
             radius="md"

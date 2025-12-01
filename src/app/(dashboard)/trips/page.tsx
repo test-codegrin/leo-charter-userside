@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Button, addToast, Progress, Select, SelectItem } from "@heroui/react";
+import { Button, addToast, Progress, Select, SelectItem, Spinner } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
@@ -39,7 +39,7 @@ interface Trip {
   updated_at: string;
   fleet: FleetItem[];
   itinerary: Itinerary;
-  invoiceTitle: string; 
+  invoiceTitle: string;
   invoiceLink: string;
   receiptUrl: string;
 }
@@ -75,7 +75,7 @@ export default function TripsPage() {
         // ✅ Deduplicate trips by ID
         const rawTrips = res.data.data || [];
         const uniqueTripsMap = new Map<number, Trip>();
-        
+
         rawTrips.forEach((trip: Trip) => {
           if (!uniqueTripsMap.has(trip.id)) {
             uniqueTripsMap.set(trip.id, trip);
@@ -105,7 +105,7 @@ export default function TripsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-white">
+      <div className="flex items-center justify-center min-h-96 text-white">
         <Progress
           isIndeterminate
           aria-label="Loading..."
@@ -183,7 +183,7 @@ export default function TripsPage() {
             disabled={page === 1}
             onPress={() => setPage(page - 1)}
           >
-            <ChevronLeft color={page === 1 ? "gray" : "white"} size={20}/>
+            <ChevronLeft color={page === 1 ? "gray" : "white"} size={20} />
           </Button>
           <Button
             size="sm"
@@ -194,7 +194,10 @@ export default function TripsPage() {
             disabled={page === totalPages}
             onPress={() => setPage(page + 1)}
           >
-            <ChevronRight color={page === totalPages ? "gray" : "white"} size={20}/>
+            <ChevronRight
+              color={page === totalPages ? "gray" : "white"}
+              size={20}
+            />
           </Button>
         </div>
       </div>

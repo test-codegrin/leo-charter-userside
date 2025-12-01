@@ -181,7 +181,7 @@ export default function PaymentHandler() {
   // ✅ UI Loading States
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-96 flex items-center justify-center bg-black text-white">
         <Spinner color="primary" />
       </div>
     );
@@ -189,7 +189,7 @@ export default function PaymentHandler() {
 
   if (error) {
     return (
-      <div className="h-screen flex items-center justify-center bg-black text-white text-center">
+      <div className="min-h-96 flex items-center justify-center bg-black text-white text-center">
         <p className="text-red-400">{error}</p>
       </div>
     );

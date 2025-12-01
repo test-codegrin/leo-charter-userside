@@ -132,10 +132,10 @@ export default function TripDetailsPage() {
       day === 1 || day === 21 || day === 31
         ? "st"
         : day === 2 || day === 22
-          ? "nd"
-          : day === 3 || day === 23
-            ? "rd"
-            : "th";
+        ? "nd"
+        : day === 3 || day === 23
+        ? "rd"
+        : "th";
 
     const formattedTime = dateObj
       .toLocaleTimeString("en-US", {
@@ -296,7 +296,7 @@ export default function TripDetailsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-white">
+      <div className="flex items-center justify-center min-h-96 text-white">
         <Progress
           isIndeterminate
           aria-label="Loading..."
@@ -335,8 +335,12 @@ export default function TripDetailsPage() {
 
         {trip.isQuoteAccepted === 1 && (
           <div className="flex items-center gap-2 text-center bg-palette-success-main rounded-full px-2 py-1">
-            <span className=" text-neutral-900 h-3.5 w-3.5 bg-palette-success-light rounded-full font-bold flex text-xs items-center justify-center">✓</span>
-            <span className=" text-palette-success-light font-bold font-sans text-xs">Quote Accepted</span>
+            <span className=" text-neutral-900 h-3.5 w-3.5 bg-palette-success-light rounded-full font-bold flex text-xs items-center justify-center">
+              ✓
+            </span>
+            <span className=" text-palette-success-light font-bold font-sans text-xs">
+              Quote Accepted
+            </span>
           </div>
         )}
       </div>
@@ -361,7 +365,10 @@ export default function TripDetailsPage() {
               <div className="flex flex-col relative">
                 {/* Pickup */}
                 {trip.itineraries?.[0]?.pickup?.map((pickup: Pickup) => (
-                  <div className="flex items-start gap-2" key={pickup.itineraryId}>
+                  <div
+                    className="flex items-start gap-2"
+                    key={pickup.itineraryId}
+                  >
                     <div className="w-3 h-3 mt-7 sm:w-3 sm:h-3 bg-gray-300 rounded-full z-10" />
                     <DataCard title="Pickup Address" value={pickup.pickups} />
                   </div>
@@ -386,9 +393,15 @@ export default function TripDetailsPage() {
 
                 {/* Dropoff */}
                 {trip.itineraries?.[0]?.dropoff?.map((dropoff: Dropoff) => (
-                  <div className="flex items-start gap-2 " key={dropoff.itineraryId}>
+                  <div
+                    className="flex items-start gap-2 "
+                    key={dropoff.itineraryId}
+                  >
                     <div className="w-3 h-3 sm:w-3 sm:h-3 bg-gray-300 mt-7 z-10" />
-                    <DataCard title="Dropoff Address" value={dropoff.dropoffs} />
+                    <DataCard
+                      title="Dropoff Address"
+                      value={dropoff.dropoffs}
+                    />
                   </div>
                 ))}
               </div>
@@ -397,20 +410,24 @@ export default function TripDetailsPage() {
             {/* Trip Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 ">
               <DataCard title="Service Type" value={trip.serviceOption} />
-              <DataCard
-                title="Pickup Date and Time"
-                value={formatDateTime(
-                  trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate,
-                  trip.itineraries?.[0]?.pickup?.[0]?.pickUpTime
-                )}
-              />
-              <DataCard
-                title="Return Date and Time"
-                value={formatDateTime(
-                  trip.itineraries?.[0]?.dropoff?.[0]?.returnDate,
-                  trip.itineraries?.[0]?.dropoff?.[0]?.returnTime
-                )}
-              />
+              {trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate && (
+                <DataCard
+                  title="Pickup Date and Time"
+                  value={formatDateTime(
+                    trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate,
+                    trip.itineraries?.[0]?.pickup?.[0]?.pickUpTime
+                  )}
+                />
+              )}
+              {trip.itineraries?.[0]?.dropoff?.[0]?.returnDate && (
+                <DataCard
+                  title="Return Date and Time"
+                  value={formatDateTime(
+                    trip.itineraries?.[0]?.dropoff?.[0]?.returnDate,
+                    trip.itineraries?.[0]?.dropoff?.[0]?.returnTime
+                  )}
+                />
+              )}
               <DataCard title="Function" value={trip.functions} />
               <DataCard
                 title="Number of Passengers"
@@ -441,15 +458,15 @@ export default function TripDetailsPage() {
               <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
                 Customer Details
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2">
                 <DataCard title="First Name" value={trip.firstName} />
                 <DataCard title="Last Name" value={trip.lastName} />
                 <DataCard title="Phone Number" value={trip.phoneNo} />
                 <DataCard title="Email" value={trip.email} />
-                <DataCard title="Company" value={trip.company} />
+                {trip.company && <DataCard title="Company" value={trip.company} />}
               </div>
               {trip.invoice[0]?.invoiceLink && (
-                <div className="flex justify-end">
+                <div className="flex justify-end mt-6">
                   <Button
                     onPress={() =>
                       window.open(trip.invoice[0]?.invoiceLink, "_blank")
@@ -467,33 +484,41 @@ export default function TripDetailsPage() {
             <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
 
             {/* Quotation */}
-            {(trip.invoice[0]?.quotedAmount &&
+            {trip.invoice[0]?.quotedAmount &&
               trip.invoice[0]?.totalAmount &&
               taxAmount &&
-              gratuitiesAmount) && (
+              gratuitiesAmount && (
                 <>
                   <div>
                     <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
                       Quotation
                     </h2>
-                    <table className="w-full text-base">
+                    <table className="min-w-lg text-base">
                       <tbody>
                         <tr>
-                          <td className="text-neutral-400 w-50">Subtotal:</td>
+                          <td className="font-sans text-sm text-palette-secondary mb-1">
+                            Subtotal:
+                          </td>
                           <td className="font-semibold">
                             ${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}
                           </td>
                         </tr>
                         <tr>
-                          <td className="text-neutral-400 w-50">Taxes:</td>
+                          <td className="font-sans text-sm text-palette-secondary mb-1">
+                            Taxes:
+                          </td>
                           <td className="font-semibold">${taxAmount}</td>
                         </tr>
                         <tr>
-                          <td className="text-neutral-400 w-50">Gratuities:</td>
+                          <td className="font-sans text-sm text-palette-secondary mb-1">
+                            Fuel charges, parking & admin fees:
+                          </td>
                           <td className="font-semibold">${gratuitiesAmount}</td>
                         </tr>
                         <tr>
-                          <td className="text-neutral-400 w-50">Total:</td>
+                          <td className="font-sans text-sm text-palette-secondary mb-1">
+                            Total:
+                          </td>
                           <td className="font-semibold">
                             CA${Number(trip.invoice[0]?.totalAmount).toFixed(1)}
                           </td>
@@ -501,8 +526,6 @@ export default function TripDetailsPage() {
                       </tbody>
                     </table>
                   </div>
-
-                  <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
                 </>
               )}
           </>
@@ -513,11 +536,9 @@ export default function TripDetailsPage() {
               className="prose prose-sm max-w-none" // Optional: Add Tailwind Typography classes
               dangerouslySetInnerHTML={{ __html: trip.summary[0].summary }}
             />
-
-
           </>
         )}
-         <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
 
         {/* Driver Details */}
         {trip.driver?.[0]?.driverName && (
@@ -525,7 +546,7 @@ export default function TripDetailsPage() {
             <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
               Driver Details
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2">
               <DataCard
                 title="First Name"
                 value={trip.driver[0]?.driverName?.split(" ")?.[0] ?? "N/A"}

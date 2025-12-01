@@ -86,7 +86,7 @@ export default function TripCard({ trip }: TripCardProps) {
       <div className="flex px-8 pt-8 pb-4 flex-col md:flex-row md:gap-6">
         
         {/* Vehicle Image - Always show first fleet's image */}
-        <div className="w-full md:w-44 flex items-center ">
+        <div className="w-full md:w-48 flex items-center ">
           {vehicle?.vehicleImage ? (
             <Image
               src={vehicle.vehicleImage}
@@ -129,8 +129,8 @@ export default function TripCard({ trip }: TripCardProps) {
 
           {/* Location Info */}
           {pickup && (
-            <div className="flex items-center px-4 py-1.5 text-white">
-              <div className="w-3 h-3 bg-white rounded-full mx-2" />
+            <div className="flex items-center pb-1.5 text-white">
+              <div className="w-3 h-3 bg-white rounded-full mr-2" />
               <div>
                 <p className="font-sans text-white text-sm">{pickup.pickUpAddress}</p>
               </div>
@@ -139,13 +139,14 @@ export default function TripCard({ trip }: TripCardProps) {
         </div>
       </div>
       
-      <div className="flex md:flex-row flex-col px-1.5 py-2 w-full">
+      <div className="flex md:flex-row flex-col pt-2 w-full">
         <Button
           color="default"
           variant="light"
           onPress={() => router.push(`/trips/${trip.id}`)}
           className="w-full font-semibold text-sm font-sans text-palette-primary"
-          size="sm"
+          size="md"
+          radius="none"
         >
           Details
         </Button>
@@ -157,7 +158,8 @@ export default function TripCard({ trip }: TripCardProps) {
               variant="light"
               onPress={() => window.open(trip.invoiceLink, "_blank")}
               className="w-full font-semibold text-sm font-sans text-palette-primary"
-              size="sm"
+              size="md"
+              radius="none"
             >
               Invoice
             </Button>
