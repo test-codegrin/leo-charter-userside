@@ -542,8 +542,8 @@ export default function TripDetailsPage() {
       {trip.user_view === "custom" && (
         <>
           <div
-            className="prose prose-sm sm:prose-base max-w-none prose-headings:text-palette-primary prose-p:text-white prose-p:break-words prose-li:text-white"
-            dangerouslySetInnerHTML={{ __html: trip.summary[0].summary }}
+            className="prose prose-sm sm:prose-base max-w-none prose-headings:text-palette-primary prose-p:text-white prose-p:break-words prose-li:text-white pl-2 pt-6"
+            dangerouslySetInnerHTML={{ __html: trip.summary[0]?.summary|| "Not Specified" }}
           />
         </>
       )}
