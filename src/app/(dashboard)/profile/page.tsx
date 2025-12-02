@@ -105,6 +105,7 @@ export default function ProfilePage() {
     setForm((s) => ({ ...s, [key]: value }));
 
   const handleSave = async () => {
+    
     setSaving(true);
     const token = localStorage.getItem("token");
     if (!token) {

@@ -44,20 +44,26 @@ body {
   color: var(--foreground);
 }
 
-/* Chrome, Edge, Safari */
-/* ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+@layer base {
+  /* Hide scrollbar globally for all elements */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+@layer utilities {
+  /* Optional: Class to show scrollbar when needed */
+  .show-scrollbar {
+    scrollbar-width: auto !important;
+    -ms-overflow-style: auto !important;
+  }
+  
+  .show-scrollbar::-webkit-scrollbar {
+    display: block !important;
+  }
 }
-
-::-webkit-scrollbar-thumb {
-  background: #fab85b;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a48d56;
-} */
