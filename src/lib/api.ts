@@ -4,7 +4,7 @@ import { BookingPayload, RegisterPayload } from "./types";
 // ✅ Create axios instance
 const api = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // // ✅ Add Authorization token automatically

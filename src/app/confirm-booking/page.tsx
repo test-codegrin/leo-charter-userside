@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { authAPI } from "@/lib/api";
 import { BookingPayload } from "@/lib/types";
+import { images } from "@/lib/assets";
 
 // ✅ Child component that uses useSearchParams
 function ConfirmationContent() {
@@ -56,7 +57,7 @@ function ConfirmationContent() {
   // ✅ Loader State
   if (loading) {
     return (
-      <div className="min-h-96 flex flex-col items-center justify-center bg-black text-white px-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-6">
         <Progress
             isIndeterminate 
             aria-label="Loading..." 
@@ -73,11 +74,13 @@ function ConfirmationContent() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-6 text-center">
         <Image
-          src="/leo.png"
+          src={images.logo}
           alt="Leo Charter Logo"
           width={250}
           height={100}
           className="object-contain mb-6"
+          unoptimized
+          priority
         />
         <h2 className="text-lg font-semibold text-red-400 mb-2">
           Booking Failed
@@ -94,11 +97,13 @@ function ConfirmationContent() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-6">
       <Image
-        src="/leo.png"
+        src={images.logo}
         alt="Leo Charter Logo"
         width={250}
         height={100}
         className="object-contain mb-10"
+        unoptimized
+        priority
       />
 
       <div className="text-center space-y-4">
@@ -112,7 +117,7 @@ function ConfirmationContent() {
 
         <p className="text-zinc-400 text-sm leading-relaxed">
           We’ll email you the invoice within 24 hours for easy online payment
-          (credit/debit/PayPal).
+          (credit/debit).
         </p>
 
         <p className="text-zinc-400 text-sm">

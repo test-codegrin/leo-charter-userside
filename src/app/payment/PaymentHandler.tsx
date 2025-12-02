@@ -27,6 +27,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { AxiosError } from "axios";
 import { CheckCircleIcon, FileText } from "lucide-react";
+import { images } from "@/lib/assets";
 
 interface DecodedData {
   invoiceId: number;
@@ -249,7 +250,7 @@ export default function PaymentHandler() {
               <h2 className="text-3xl font-bold text-white mb-2">Complete Your Payment</h2>
               <div className="flex items-center justify-center gap-2">
                 <p className="text-zinc-400 text-sm">Secure transaction powered by</p>
-                <Image src="/assets/stripe.png" alt="Stripe" width={50} height={50} />
+                <Image src={images.stripeLogo} alt="Stripe" width={50} height={50} />
               </div>
             </div>
 

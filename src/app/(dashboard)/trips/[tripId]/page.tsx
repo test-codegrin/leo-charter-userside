@@ -296,7 +296,7 @@ export default function TripDetailsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96 text-white">
+      <div className="flex items-center justify-center h-screen text-white">
         <Progress
           isIndeterminate
           aria-label="Loading..."
@@ -354,7 +354,7 @@ export default function TripDetailsPage() {
         </span>
       </h2>
 
-      {trip.user_view === "detailed" && (
+      {trip.user_view === "wix" && (
         <>
           {/* Itinerary Section */}
           <div className="relative mb-6">
@@ -498,7 +498,7 @@ export default function TripDetailsPage() {
                       <col className="w-1/2" />
                     </colgroup>
                     <tbody>
-                      <tr className="border-b border-divider/20">
+                      <tr>
                         <td className="font-sans text-xs sm:text-sm text-palette-secondary pl-2">
                           Subtotal:
                         </td>
@@ -506,7 +506,7 @@ export default function TripDetailsPage() {
                           ${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}
                         </td>
                       </tr>
-                      <tr className="border-b border-divider/20">
+                      <tr>
                         <td className="font-sans text-xs sm:text-sm text-palette-secondary pl-2">
                           Taxes:
                         </td>
@@ -514,7 +514,7 @@ export default function TripDetailsPage() {
                           ${taxAmount}
                         </td>
                       </tr>
-                      <tr className="border-b border-divider/20">
+                      <tr>
                         <td className="font-sans text-xs sm:text-sm text-palette-secondary pl-2">
                           Fuel charges, parking & admin fees:
                         </td>
@@ -539,7 +539,7 @@ export default function TripDetailsPage() {
         </>
       )}
 
-      {trip.user_view === "summarized" && (
+      {trip.user_view === "custom" && (
         <>
           <div
             className="prose prose-sm sm:prose-base max-w-none prose-headings:text-palette-primary prose-p:text-white prose-p:break-words prose-li:text-white"
