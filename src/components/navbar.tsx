@@ -29,7 +29,7 @@ export default function Navbar({ onMenuClick, isMobileMenuOpen }: NavbarProps) {
         {/* Logo: always visible */}
         <div className="flex items-center">
           <Image
-            src="/leo.png"
+            src="/leo.webp"
             alt="Leo Charter Services"
             width={180}
             height={60}

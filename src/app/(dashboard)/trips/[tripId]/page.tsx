@@ -132,10 +132,10 @@ export default function TripDetailsPage() {
       day === 1 || day === 21 || day === 31
         ? "st"
         : day === 2 || day === 22
-        ? "nd"
-        : day === 3 || day === 23
-        ? "rd"
-        : "th";
+          ? "nd"
+          : day === 3 || day === 23
+            ? "rd"
+            : "th";
 
     const formattedTime = dateObj
       .toLocaleTimeString("en-US", {
@@ -346,9 +346,9 @@ export default function TripDetailsPage() {
       </div>
 
       {/* Title */}
-      <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8 break-words">
+      <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold">
         Trip {trip.user_view === "detailed" ? "Details" : "Summary"}
-        <span className="block sm:inline mt-1 sm:mt-0 break-all">
+        <span className="block sm:inline break-all">
           {" "}
           ({trip.externalTripId})
         </span>
@@ -357,7 +357,7 @@ export default function TripDetailsPage() {
       {trip.user_view === "detailed" && (
         <>
           {/* Itinerary Section */}
-          <div className="relative mb-6 md:mb-8">
+          <div className="relative mb-6">
             {/* Vertical connecting line */}
             <div className="absolute mt-5 top-6 sm:top-7 left-[3px] sm:left-[5px] w-[1.5px] sm:w-[2px] bg-divider h-[calc(100%-5rem)] sm:h-[calc(100%-6rem)]" />
 
@@ -454,7 +454,7 @@ export default function TripDetailsPage() {
 
           {/* Customer Details */}
           <div>
-            <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
+            <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold">
               Customer Details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
@@ -489,53 +489,56 @@ export default function TripDetailsPage() {
             gratuitiesAmount && (
               <>
                 <div>
-                  <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
+                  <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold">
                     Quotation
                   </h2>
-                  <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                    <table className="w-full text-sm sm:text-base min-w-[280px]">
-                      <tbody>
-                        <tr className="border-b border-divider/20">
-                          <td className="font-sans text-xs sm:text-sm text-palette-secondary py-2 pr-4">
-                            Subtotal:
-                          </td>
-                          <td className="font-semibold text-right py-2 whitespace-nowrap">
-                            ${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}
-                          </td>
-                        </tr>
-                        <tr className="border-b border-divider/20">
-                          <td className="font-sans text-xs sm:text-sm text-palette-secondary py-2 pr-4">
-                            Taxes:
-                          </td>
-                          <td className="font-semibold text-right py-2 whitespace-nowrap">
-                            ${taxAmount}
-                          </td>
-                        </tr>
-                        <tr className="border-b border-divider/20">
-                          <td className="font-sans text-xs sm:text-sm text-palette-secondary py-2 pr-4">
-                            Fuel charges, parking & admin fees:
-                          </td>
-                          <td className="font-semibold text-right py-2 whitespace-nowrap">
-                            ${gratuitiesAmount}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="font-sans text-xs sm:text-sm text-palette-secondary py-2 pr-4 font-semibold">
-                            Total:
-                          </td>
-                          <td className="font-semibold text-right py-2 whitespace-nowrap">
-                            CA${Number(trip.invoice[0]?.totalAmount).toFixed(1)}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                  <table className="w-full text-sm sm:text-base table-fixed mt-6">
+                    <colgroup>
+                      <col className="w-1/2" />
+                      <col className="w-1/2" />
+                    </colgroup>
+                    <tbody>
+                      <tr className="border-b border-divider/20">
+                        <td className="font-sans text-xs sm:text-sm text-palette-secondary pl-2">
+                          Subtotal:
+                        </td>
+                        <td className="font-semibold pl-2">
+                          ${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}
+                        </td>
+                      </tr>
+                      <tr className="border-b border-divider/20">
+                        <td className="font-sans text-xs sm:text-sm text-palette-secondary pl-2">
+                          Taxes:
+                        </td>
+                        <td className="font-semibold pl-2">
+                          ${taxAmount}
+                        </td>
+                      </tr>
+                      <tr className="border-b border-divider/20">
+                        <td className="font-sans text-xs sm:text-sm text-palette-secondary pl-2">
+                          Fuel charges, parking & admin fees:
+                        </td>
+                        <td className="font-semibold pl-2">
+                          ${gratuitiesAmount}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="font-sans text-xs sm:text-sm text-palette-secondary font-semibold pl-2">
+                          Total:
+                        </td>
+                        <td className="font-semibold pl-2">
+                          CA${Number(trip.invoice[0]?.totalAmount).toFixed(1)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
+
               </>
             )}
         </>
       )}
-      
+
       {trip.user_view === "summarized" && (
         <>
           <div
@@ -544,13 +547,13 @@ export default function TripDetailsPage() {
           />
         </>
       )}
-      
+
       <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
 
       {/* Driver Details */}
       {trip.driver?.[0]?.driverName && (
         <div>
-          <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
+          <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold">
             Driver Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0">

@@ -150,7 +150,7 @@ export default function TripCard({ trip }: TripCardProps) {
         >
           Details
         </Button>
-        {trip.invoiceLink && (
+        {/* {trip.invoiceLink && (
           <>
             <div className="w-0.5 bg-palette-primary opacity-50 rounded-full md:block hidden"/>
             <Button
@@ -178,7 +178,7 @@ export default function TripCard({ trip }: TripCardProps) {
               Payment Receipt
             </Button>
           </>
-        )}
+        )} */}
       </div>
     </div>
   );

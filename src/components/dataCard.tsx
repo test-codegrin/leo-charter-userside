@@ -6,7 +6,7 @@ interface DataCardProps {
   className?: string;
 }
 
-export default function DataCard({ title, value, className }: DataCardProps) {
+export default function DataCard({ title, value, className="" }: DataCardProps) {
   return (
     <div className={`flex flex-col pl-2 pt-6 ${className}`}>
       <p className="font-sans text-sm text-palette-secondary mb-1">{title}</p>

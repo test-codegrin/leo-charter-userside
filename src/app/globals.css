@@ -6,6 +6,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  background: black;
+  color: white;
   
   --background: #ffffff;
   --foreground: #171717;
