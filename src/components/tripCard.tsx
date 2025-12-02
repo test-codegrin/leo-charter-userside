@@ -94,6 +94,8 @@ export default function TripCard({ trip }: TripCardProps) {
               className="object-contain"
               width={500}
               height={100}
+              unoptimized
+              priority
             />
           ) : (
             <div className="text-zinc-600">No Image</div>
