@@ -3,6 +3,7 @@
 import { Menu, X } from "lucide-react";
 import { Button } from "@heroui/react";
 import Image from "next/image";
+import { images } from "@/lib/assets";
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -29,11 +30,13 @@ export default function Navbar({ onMenuClick, isMobileMenuOpen }: NavbarProps) {
         {/* Logo: always visible */}
         <div className="flex items-center">
           <Image
-            src="/assets/leo.png"
+            src={images.logo}
             alt="Leo Charter Services Logo"
             width={180}
             height={60}
             className="object-contain"
+            unoptimized
+            priority
           />
         </div>
 
