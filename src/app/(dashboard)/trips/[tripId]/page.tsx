@@ -300,7 +300,7 @@ export default function TripDetailsPage() {
         <Progress
           isIndeterminate
           aria-label="Loading..."
-          className="max-w-xs w-full "
+          className="max-w-xs w-full"
           size="sm"
           color="primary"
         />
@@ -322,251 +322,257 @@ export default function TripDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen text-white px-4 sm:px-6 py-4 sm:py-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 md:mb-1 gap-2">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <button
           onClick={() => router.push(routes.trips)}
-          className="font-sans flex items-center gap-1 sm:gap-2 cursor-pointer text-palette-primary font-semibold text-sm sm:text-base"
+          className="font-sans flex items-center gap-1 sm:gap-2 cursor-pointer text-palette-primary font-semibold text-sm sm:text-base py-2 -ml-1 touch-manipulation min-h-[44px]"
         >
-          <ChevronLeft size={20} className="sm:w-5 sm:h-5" />
+          <ChevronLeft size={24} className="sm:w-5 sm:h-5" />
           <span>BACK</span>
         </button>
 
         {trip.isQuoteAccepted === 1 && (
-          <div className="flex items-center gap-2 text-center bg-palette-success-main rounded-full px-2 py-1">
-            <span className=" text-neutral-900 h-3.5 w-3.5 bg-palette-success-light rounded-full font-bold flex text-xs items-center justify-center">
+          <div className="flex items-center gap-2 text-center bg-palette-success-main rounded-full px-3 py-1.5 sm:px-2 sm:py-1">
+            <span className="text-neutral-900 h-3.5 w-3.5 bg-palette-success-light rounded-full font-bold flex text-xs items-center justify-center">
               ✓
             </span>
-            <span className=" text-palette-success-light font-bold font-sans text-xs">
+            <span className="text-palette-success-light font-bold font-sans text-xs whitespace-nowrap">
               Quote Accepted
             </span>
           </div>
         )}
       </div>
 
-      <div className="ml-4 sm:ml-6">
-        {/* Title */}
-        <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
-          Trip {trip.user_view === "detailed" ? "Details" : "Summary"}
-          <span className="block sm:inline mt-1 sm:mt-0">
-            {" "}
-            ({trip.externalTripId})
-          </span>
-        </h2>
+      {/* Title */}
+      <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8 break-words">
+        Trip {trip.user_view === "detailed" ? "Details" : "Summary"}
+        <span className="block sm:inline mt-1 sm:mt-0 break-all">
+          {" "}
+          ({trip.externalTripId})
+        </span>
+      </h2>
 
-        {trip.user_view === "detailed" && (
-          <>
-            {/* Itinerary Section */}
-            <div className="relative mb-6 md:mb-8">
-              {/* Vertical connecting line */}
-              <div className="absolute mt-5 top-6 sm:top-7 left-[5px] w-[2px] bg-divider h-[calc(100%-5.5rem)] sm:h-[calc(100%-6rem)]" />
+      {trip.user_view === "detailed" && (
+        <>
+          {/* Itinerary Section */}
+          <div className="relative mb-6 md:mb-8">
+            {/* Vertical connecting line */}
+            <div className="absolute mt-5 top-6 sm:top-7 left-[3px] sm:left-[5px] w-[1.5px] sm:w-[2px] bg-divider h-[calc(100%-5rem)] sm:h-[calc(100%-6rem)]" />
 
-              <div className="flex flex-col relative">
-                {/* Pickup */}
-                {trip.itineraries?.[0]?.pickup?.map((pickup: Pickup) => (
-                  <div
-                    className="flex items-start gap-2"
-                    key={pickup.itineraryId}
-                  >
-                    <div className="w-3 h-3 mt-7 sm:w-3 sm:h-3 bg-gray-300 rounded-full z-10" />
-                    <DataCard title="Pickup Address" value={pickup.pickups} />
-                  </div>
-                ))}
-
-                {/* Stops */}
-                {trip.stops && trip.stops.length > 0 && (
-                  <>
-                    {trip.stops.map((stop: Stop, index: number) => (
-                      <div
-                        className="flex items-start ml-5 sm:ml-9"
-                        key={stop.stopId}
-                      >
-                        <DataCard
-                          title={`Stop ${index + 1} : ${stop.stopName}`}
-                          value={stop.address}
-                        />
-                      </div>
-                    ))}
-                  </>
-                )}
-
-                {/* Dropoff */}
-                {trip.itineraries?.[0]?.dropoff?.map((dropoff: Dropoff) => (
-                  <div
-                    className="flex items-start gap-2 "
-                    key={dropoff.itineraryId}
-                  >
-                    <div className="w-3 h-3 sm:w-3 sm:h-3 bg-gray-300 mt-7 z-10" />
-                    <DataCard
-                      title="Dropoff Address"
-                      value={dropoff.dropoffs}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Trip Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 ">
-              <DataCard title="Service Type" value={trip.serviceOption} />
-              {trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate && (
-                <DataCard
-                  title="Pickup Date and Time"
-                  value={formatDateTime(
-                    trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate,
-                    trip.itineraries?.[0]?.pickup?.[0]?.pickUpTime
-                  )}
-                />
-              )}
-              {trip.itineraries?.[0]?.dropoff?.[0]?.returnDate && (
-                <DataCard
-                  title="Return Date and Time"
-                  value={formatDateTime(
-                    trip.itineraries?.[0]?.dropoff?.[0]?.returnDate,
-                    trip.itineraries?.[0]?.dropoff?.[0]?.returnTime
-                  )}
-                />
-              )}
-              <DataCard title="Function" value={trip.functions} />
-              <DataCard
-                title="Number of Passengers"
-                value={trip.numberOfPassengers}
-              />
-              <DataCard
-                title="Vehicle Class"
-                value={trip.fleet?.[0]?.vehicleClass}
-              />
-              <DataCard
-                title="Preferred Vehicle"
-                value={trip.fleet?.[0]?.preferedVehicleType}
-                className="md:col-span-2"
-              />
-              <DataCard
-                title="Note to us"
-                value={trip.noteToUs}
-                className="md:col-span-2"
-              />
-              <DataCard title="Promo Code" value={""} />
-            </div>
-
-            {/* Divider */}
-            <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
-
-            {/* Customer Details */}
-            <div>
-              <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
-                Customer Details
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                <DataCard title="First Name" value={trip.firstName} />
-                <DataCard title="Last Name" value={trip.lastName} />
-                <DataCard title="Phone Number" value={trip.phoneNo} />
-                <DataCard title="Email" value={trip.email} />
-                {trip.company && <DataCard title="Company" value={trip.company} />}
-              </div>
-              {trip.invoice[0]?.invoiceLink && (
-                <div className="flex justify-end mt-6">
-                  <Button
-                    onPress={() =>
-                      window.open(trip.invoice[0]?.invoiceLink, "_blank")
-                    }
-                    variant="solid"
-                    color="primary"
-                    className="font-sans font-bold"
-                  >
-                    View Invoice
-                  </Button>
+            <div className="flex flex-col relative">
+              {/* Pickup */}
+              {trip.itineraries?.[0]?.pickup?.map((pickup: Pickup) => (
+                <div
+                  className="flex items-start gap-2 sm:gap-2"
+                  key={pickup.itineraryId}
+                >
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 mt-7 bg-gray-300 rounded-full z-10 flex-shrink-0" />
+                  <DataCard title="Pickup Address" value={pickup.pickups} />
                 </div>
-              )}
-            </div>
+              ))}
 
-            <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
-
-            {/* Quotation */}
-            {trip.invoice[0]?.quotedAmount &&
-              trip.invoice[0]?.totalAmount &&
-              taxAmount &&
-              gratuitiesAmount && (
+              {/* Stops */}
+              {trip.stops && trip.stops.length > 0 && (
                 <>
-                  <div>
-                    <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
-                      Quotation
-                    </h2>
-                    <table className="min-w-lg text-base">
+                  {trip.stops.map((stop: Stop, index: number) => (
+                    <div
+                      className="flex items-start ml-4 sm:ml-5 md:ml-9"
+                      key={stop.stopId}
+                    >
+                      <DataCard
+                        title={`Stop ${index + 1} : ${stop.stopName}`}
+                        value={stop.address}
+                      />
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Dropoff */}
+              {trip.itineraries?.[0]?.dropoff?.map((dropoff: Dropoff) => (
+                <div
+                  className="flex items-start gap-2 sm:gap-2"
+                  key={dropoff.itineraryId}
+                >
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 mt-7 bg-gray-300 z-10 flex-shrink-0" />
+                  <DataCard
+                    title="Dropoff Address"
+                    value={dropoff.dropoffs}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Trip Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+            <DataCard title="Service Type" value={trip.serviceOption} />
+            {trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate && (
+              <DataCard
+                title="Pickup Date and Time"
+                value={formatDateTime(
+                  trip.itineraries?.[0]?.pickup?.[0]?.pickUpDate,
+                  trip.itineraries?.[0]?.pickup?.[0]?.pickUpTime
+                )}
+              />
+            )}
+            {trip.itineraries?.[0]?.dropoff?.[0]?.returnDate && (
+              <DataCard
+                title="Return Date and Time"
+                value={formatDateTime(
+                  trip.itineraries?.[0]?.dropoff?.[0]?.returnDate,
+                  trip.itineraries?.[0]?.dropoff?.[0]?.returnTime
+                )}
+              />
+            )}
+            <DataCard title="Function" value={trip.functions} />
+            <DataCard
+              title="Number of Passengers"
+              value={trip.numberOfPassengers}
+            />
+            <DataCard
+              title="Vehicle Class"
+              value={trip.fleet?.[0]?.vehicleClass}
+            />
+            <DataCard
+              title="Preferred Vehicle"
+              value={trip.fleet?.[0]?.preferedVehicleType}
+              className="md:col-span-2"
+            />
+            <DataCard
+              title="Note to us"
+              value={trip.noteToUs}
+              className="md:col-span-2"
+            />
+            <DataCard title="Promo Code" value={""} />
+          </div>
+
+          {/* Divider */}
+          <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+
+          {/* Customer Details */}
+          <div>
+            <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
+              Customer Details
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+              <DataCard title="First Name" value={trip.firstName} />
+              <DataCard title="Last Name" value={trip.lastName} />
+              <DataCard title="Phone Number" value={trip.phoneNo} />
+              <DataCard title="Email" value={trip.email} />
+              {trip.company && <DataCard title="Company" value={trip.company} />}
+            </div>
+            {trip.invoice[0]?.invoiceLink && (
+              <div className="flex justify-end mt-6">
+                <Button
+                  onPress={() =>
+                    window.open(trip.invoice[0]?.invoiceLink, "_blank")
+                  }
+                  variant="solid"
+                  color="primary"
+                  className="font-sans font-bold w-full sm:w-auto"
+                >
+                  View Invoice
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+
+          {/* Quotation */}
+          {trip.invoice[0]?.quotedAmount &&
+            trip.invoice[0]?.totalAmount &&
+            taxAmount &&
+            gratuitiesAmount && (
+              <>
+                <div>
+                  <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
+                    Quotation
+                  </h2>
+                  <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                    <table className="w-full text-sm sm:text-base min-w-[280px]">
                       <tbody>
-                        <tr>
-                          <td className="font-sans text-sm text-palette-secondary mb-1">
+                        <tr className="border-b border-divider/20">
+                          <td className="font-sans text-xs sm:text-sm text-palette-secondary py-2 pr-4">
                             Subtotal:
                           </td>
-                          <td className="font-semibold">
+                          <td className="font-semibold text-right py-2 whitespace-nowrap">
                             ${Number(trip.invoice[0]?.quotedAmount).toFixed(1)}
                           </td>
                         </tr>
-                        <tr>
-                          <td className="font-sans text-sm text-palette-secondary mb-1">
+                        <tr className="border-b border-divider/20">
+                          <td className="font-sans text-xs sm:text-sm text-palette-secondary py-2 pr-4">
                             Taxes:
                           </td>
-                          <td className="font-semibold">${taxAmount}</td>
+                          <td className="font-semibold text-right py-2 whitespace-nowrap">
+                            ${taxAmount}
+                          </td>
                         </tr>
-                        <tr>
-                          <td className="font-sans text-sm text-palette-secondary mb-1">
+                        <tr className="border-b border-divider/20">
+                          <td className="font-sans text-xs sm:text-sm text-palette-secondary py-2 pr-4">
                             Fuel charges, parking & admin fees:
                           </td>
-                          <td className="font-semibold">${gratuitiesAmount}</td>
+                          <td className="font-semibold text-right py-2 whitespace-nowrap">
+                            ${gratuitiesAmount}
+                          </td>
                         </tr>
                         <tr>
-                          <td className="font-sans text-sm text-palette-secondary mb-1">
+                          <td className="font-sans text-xs sm:text-sm text-palette-secondary py-2 pr-4 font-semibold">
                             Total:
                           </td>
-                          <td className="font-semibold">
+                          <td className="font-semibold text-right py-2 whitespace-nowrap">
                             CA${Number(trip.invoice[0]?.totalAmount).toFixed(1)}
                           </td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
-                </>
-              )}
-          </>
-        )}
-        {trip.user_view === "summarized" && (
-          <>
-            <div
-              className="prose prose-sm max-w-none" // Optional: Add Tailwind Typography classes
-              dangerouslySetInnerHTML={{ __html: trip.summary[0].summary }}
+                </div>
+              </>
+            )}
+        </>
+      )}
+      
+      {trip.user_view === "summarized" && (
+        <>
+          <div
+            className="prose prose-sm sm:prose-base max-w-none prose-headings:text-palette-primary prose-p:text-white prose-p:break-words prose-li:text-white"
+            dangerouslySetInnerHTML={{ __html: trip.summary[0].summary }}
+          />
+        </>
+      )}
+      
+      <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+
+      {/* Driver Details */}
+      {trip.driver?.[0]?.driverName && (
+        <div>
+          <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
+            Driver Details
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+            <DataCard
+              title="First Name"
+              value={trip.driver[0]?.driverName?.split(" ")?.[0] ?? "N/A"}
             />
-          </>
-        )}
-        <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
-
-        {/* Driver Details */}
-        {trip.driver?.[0]?.driverName && (
-          <div>
-            <h2 className="font-barlow text-xl sm:text-2xl text-palette-primary font-semibold mb-6 md:mb-8">
-              Driver Details
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <DataCard
-                title="First Name"
-                value={trip.driver[0]?.driverName?.split(" ")?.[0] ?? "N/A"}
-              />
-              <DataCard
-                title="Last Name"
-                value={trip.driver[0]?.driverName?.split(" ")?.[1] ?? "N/A"}
-              />
-              <DataCard
-                title="Phone Number"
-                value={trip.driver[0]?.phoneNo ?? "N/A"}
-              />
-            </div>
-            <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+            <DataCard
+              title="Last Name"
+              value={trip.driver[0]?.driverName?.split(" ")?.[1] ?? "N/A"}
+            />
+            <DataCard
+              title="Phone Number"
+              value={trip.driver[0]?.phoneNo ?? "N/A"}
+            />
           </div>
-        )}
+          <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+        </div>
+      )}
 
-        {/* Terms and Conditions */}
-        <TermsAndConditions />
-      </div>
+      {/* Terms and Conditions */}
+      <TermsAndConditions />
     </div>
   );
 }
