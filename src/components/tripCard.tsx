@@ -33,6 +33,7 @@ interface Trip {
   fleet: FleetItem[];
   itinerary: Itinerary;
   created_at: string;
+  user_view: string;
   invoiceTitle: string;
   invoiceLink: string;
   receiptUrl: string;
@@ -106,7 +107,7 @@ export default function TripCard({ trip }: TripCardProps) {
         <div className="flex flex-col gap-2">
           
           <h2 className="md:text-lg text-base font-barlow font-semibold text-white">
-            {trip.invoiceTitle || formatDateTime(pickup.pickUpDate, pickup.pickUpTime)}
+            {trip.user_view ==="custom" ? trip.invoiceTitle || formatDateTime(pickup.pickUpDate, pickup.pickUpTime) : formatDateTime(pickup.pickUpDate, pickup.pickUpTime)}
           </h2>
           
           {/* Vehicle Type(s) - Always show all */}

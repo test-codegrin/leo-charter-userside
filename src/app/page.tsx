@@ -1,7 +1,8 @@
+// In app/login/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Card, CardBody, addToast } from "@heroui/react";
 import { authAPI } from "@/lib/api";
 import { routes } from "@/lib/routes";
@@ -12,22 +13,23 @@ import { images } from "@/lib/assets";
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true); // Prevent flash of content
+  const [checking, setChecking] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams(); // ✅ NEW
 
-  // ✅ Check if user is already authenticated
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
 
     if (token && user) {
-      // User is already logged in, redirect to dashboard
-      router.push(routes.trips);
+      // ✅ Check if there's a redirect parameter
+      const redirect = searchParams.get("redirect");
+      router.push(redirect || routes.trips);
       return;
     }
 
-    setChecking(false); // Allow rendering if not authenticated
-  }, [router]);
+    setChecking(false);
+  }, [router, searchParams]);
 
   const handleSendOtp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,19 +47,22 @@ export default function SignIn() {
       setLoading(true);
       const res = await authAPI.sendOtp(email);
 
-      // ✅ Handle 204 manually (Axios doesn't auto reject)
       if (res.status === 204) {
         addToast({
           title: "Email Not Found",
           description: `We could not find any bookings associated with ${email}`,
           color: "warning",
         });
-        return; // stop here
+        return;
       }
 
-      // ✅ Success
       localStorage.setItem("pendingEmail", email);
       localStorage.setItem("otpToken", res.data.token);
+      
+      const redirect = searchParams.get("redirect");
+      if (redirect) {
+        localStorage.setItem("redirectAfterLogin", redirect);
+      }
 
       router.push(routes.verify);
     } catch (error: unknown) {
@@ -78,7 +83,6 @@ export default function SignIn() {
     }
   };
 
-  // ✅ Show nothing while checking auth status (prevents flash)
   if (checking) {
     return (
       <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900">

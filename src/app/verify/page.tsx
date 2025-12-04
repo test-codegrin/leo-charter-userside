@@ -45,52 +45,56 @@ export default function VerifyOtp() {
     return () => clearInterval(countdown);
   }, [router]);
 
-  // ✅ Verify OTP
+  // Verify OTP
   const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!otp.trim()) {
-      addToast({
-        title: "Missing OTP",
-        description: "Please enter the 6-digit OTP sent to your email.",
-        color: "danger",
-      });
-      return;
-    }
+  e.preventDefault();
+  if (!otp.trim()) {
+    addToast({
+      title: "Missing OTP",
+      description: "Please enter the 6-digit OTP sent to your email.",
+      color: "danger",
+    });
+    return;
+  }
 
-    try {
-      setLoading(true);
-      const res = await authAPI.verifyOtp(email, otp, token);
+  try {
+    setLoading(true);
+    const res = await authAPI.verifyOtp(email, otp, token);
 
-      if (res.data.success) {
-        // ✅ Store user and permanent token
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        localStorage.removeItem("pendingEmail");
-        localStorage.removeItem("otpToken");
+    if (res.data.success) {
+      // ✅ Store user and permanent token
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      
+      // ✅ Get redirect URL and clean up
+      const redirectUrl = localStorage.getItem("redirectAfterLogin");
+      localStorage.removeItem("pendingEmail");
+      localStorage.removeItem("otpToken");
+      localStorage.removeItem("redirectAfterLogin");
 
-        // ✅ Redirect after 1 second
-        setTimeout(() => {
-          router.replace(routes.trips);
-        }, 1000);
-      } else {
-        setLoading(false);
-        addToast({
-          title: "Invalid OTP",
-          description: "Please enter the correct OTP or request a new one.",
-          color: "danger",
-        });
-      }
-    } catch (error: unknown) {
-      const err = error as AxiosError<{ message?: string }>;
-      console.error(err);
+      // ✅ Redirect to original page or default to trips
+      setTimeout(() => {
+        router.replace(redirectUrl || routes.trips);
+      }, 1000);
+    } else {
       setLoading(false);
       addToast({
-        title: "Verification Failed",
-        description: err.response?.data?.message || "OTP invalid or expired.",
+        title: "Invalid OTP",
+        description: "Please enter the correct OTP or request a new one.",
         color: "danger",
       });
     }
-  };
+  } catch (error: unknown) {
+    const err = error as AxiosError<{ message?: string }>;
+    console.error(err);
+    setLoading(false);
+    addToast({
+      title: "Verification Failed",
+      description: err.response?.data?.message || "OTP invalid or expired.",
+      color: "danger",
+    });
+  }
+};
 
   // 🔁 Resend OTP
   const handleResendOtp = async () => {

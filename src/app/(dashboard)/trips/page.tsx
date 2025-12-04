@@ -7,11 +7,13 @@ import { routes } from "@/lib/routes";
 import TripCard from "@/components/tripCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+
 interface FleetItem {
   vehicleClass: string;
   preferedVehicleType: string;
   vehicleImage: string;
 }
+
 
 interface Itinerary {
   pickups: {
@@ -26,12 +28,14 @@ interface Itinerary {
   }[];
 }
 
+
 interface Trip {
   id: number;
   externalTripId: string;
   isQuoteAccepted: number;
   test: number;
   customer: string;
+  user_view: string;
   email: string;
   service: string;
   quotationDescription: string | null;
@@ -44,6 +48,7 @@ interface Trip {
   receiptUrl: string;
 }
 
+
 export default function TripsPage() {
   const [loading, setLoading] = useState(true);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -52,7 +57,9 @@ export default function TripsPage() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
+
   const router = useRouter();
+
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -70,11 +77,14 @@ export default function TripsPage() {
         }
         const user = JSON.parse(userData);
 
+
         const res = await authAPI.getUserTrips(user.userId, token, page, limit);
+
 
         // ✅ Deduplicate trips by ID
         const rawTrips = res.data.data || [];
         const uniqueTripsMap = new Map<number, Trip>();
+
 
         rawTrips.forEach((trip: Trip) => {
           if (!uniqueTripsMap.has(trip.id)) {
@@ -82,11 +92,14 @@ export default function TripsPage() {
           }
         });
 
+
         const uniqueTrips = Array.from(uniqueTripsMap.values());
 
+
         setTrips(uniqueTrips);
-        setTotal(uniqueTrips.length); // Use deduplicated count
-        setTotalPages(Math.ceil(uniqueTrips.length / limit));
+        // ✅ Use API response for total and totalPages
+        setTotal(res.data.total);
+        setTotalPages(res.data.totalPages);
       } catch (err) {
         console.error("Error loading trips:", err);
         addToast({
@@ -99,9 +112,11 @@ export default function TripsPage() {
       }
     };
 
+
     setLoading(true);
     fetchTrips();
   }, [router, page, limit]);
+
 
   if (loading) {
     return (
@@ -117,6 +132,7 @@ export default function TripsPage() {
     );
   }
 
+
   if (trips.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-white">
@@ -128,8 +144,10 @@ export default function TripsPage() {
     );
   }
 
+
   const firstItem = total === 0 ? 0 : (page - 1) * limit + 1;
   const lastItem = Math.min(page * limit, total);
+
 
   return (
     <div className=" text-white">
@@ -137,15 +155,18 @@ export default function TripsPage() {
         <h1 className="text-xl font-barlow font-semibold">Trips</h1>
       </div>
 
+
       <div className="space-y-4 sm:space-y-6">
         {trips.map((trip) => (
           <TripCard key={trip.id} trip={trip} />
         ))}
       </div>
 
+
       {/* Pagination */}
       <div className="flex items-center justify-end mt-8 px-2 gap-2 sm:gap-6">
         <span className="text-white font-sans text-sm">Cards per page:</span>
+
 
         <div className="w-16">
           <Select
@@ -169,9 +190,11 @@ export default function TripsPage() {
           </Select>
         </div>
 
+
         <div className="text-white font-sans text-sm text-center">
           {firstItem}-{lastItem} of {total}
         </div>
+
 
         <div className="flex items-center gap-1">
           <Button

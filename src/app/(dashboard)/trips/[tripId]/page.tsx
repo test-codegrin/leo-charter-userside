@@ -154,15 +154,17 @@ export default function TripDetailsPage() {
         const token = localStorage.getItem("token");
         const userData = localStorage.getItem("user");
 
-        if (!token || !userData) {
-          addToast({
-            title: "Unauthorized",
-            description: "Please login first.",
-            color: "danger",
-          });
-          router.push(routes.login);
-          return;
-        }
+         if (!token || !userData) {
+       
+        const currentPath = window.location.pathname;
+        addToast({
+          title: "Unauthorized",
+          description: "Please login first.",
+          color: "danger",
+        });
+        router.push(`${routes.login}?redirect=${encodeURIComponent(currentPath)}`);
+        return;
+      }
 
         if (!tripId || isNaN(tripId)) {
           addToast({
