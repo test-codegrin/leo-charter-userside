@@ -515,14 +515,16 @@ export default function TripDetailsPage() {
                           ${taxAmount}
                         </td>
                       </tr>
-                      <tr>
-                        <td className="font-sans text-xs sm:text-sm text-palette-secondary pl-2">
-                          Fuel charges, parking & admin fees:
-                        </td>
-                        <td className="font-semibold pl-2">
-                          ${gratuitiesAmount}
-                        </td>
-                      </tr>
+                      {Number(trip?.invoice[0]?.gratuities) !== 0 && (
+                        <tr>
+                          <td className="font-sans text-xs sm:text-sm text-palette-secondary pl-2">
+                            Fuel charges, parking & admin fees:
+                          </td>
+                          <td className="font-semibold pl-2">
+                            ${gratuitiesAmount}
+                          </td>
+                        </tr>
+                      )}
                       <tr>
                         <td className="font-sans text-xs sm:text-sm text-palette-secondary font-semibold pl-2">
                           Total:
@@ -534,7 +536,7 @@ export default function TripDetailsPage() {
                     </tbody>
                   </table>
                 </div>
-<div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+                <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
               </>
             )}
         </>
