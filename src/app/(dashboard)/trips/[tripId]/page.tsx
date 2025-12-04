@@ -534,7 +534,7 @@ export default function TripDetailsPage() {
                     </tbody>
                   </table>
                 </div>
-
+<div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
               </>
             )}
         </>
