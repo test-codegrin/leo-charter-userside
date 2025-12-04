@@ -447,6 +447,7 @@ export default function TripDetailsPage() {
               className="md:col-span-2"
             />
             <DataCard title="Promo Code" value={""} />
+            <DataCard title="Flight Number" value={trip.flightNumber} />
           </div>
 
           {/* Divider */}
@@ -462,7 +463,7 @@ export default function TripDetailsPage() {
               <DataCard title="Last Name" value={trip.lastName} />
               <DataCard title="Phone Number" value={trip.phoneNo} />
               <DataCard title="Email" value={trip.email} />
-              {trip.company && <DataCard title="Company" value={trip.company} />}
+              <DataCard title="Company" value={trip.company} />
             </div>
             {trip.invoice[0]?.invoiceLink && (
               <div className="flex justify-end mt-6">
