@@ -545,10 +545,11 @@ export default function TripDetailsPage() {
             className="prose prose-sm sm:prose-base max-w-none prose-headings:text-palette-primary prose-p:text-white prose-p:break-words prose-li:text-white pl-2 pt-6"
             dangerouslySetInnerHTML={{ __html: trip.summary[0]?.summary|| "Not Specified" }}
           />
+          <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
         </>
       )}
 
-      <div className="my-6 md:my-8 border-b-[0.5px] border-dashed border-divider w-full" />
+      
 
       {/* Driver Details */}
       {trip.driver?.[0]?.driverName && (
