@@ -1,7 +1,6 @@
-// In app/login/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Input, Card, CardBody, addToast } from "@heroui/react";
 import { authAPI } from "@/lib/api";
@@ -10,19 +9,19 @@ import { AxiosError } from "axios";
 import Image from "next/image";
 import { images } from "@/lib/assets";
 
-export default function SignIn() {
+// Separate component that uses useSearchParams
+function SignInForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const router = useRouter();
-  const searchParams = useSearchParams(); // ✅ NEW
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
 
     if (token && user) {
-      // ✅ Check if there's a redirect parameter
       const redirect = searchParams.get("redirect");
       router.push(redirect || routes.trips);
       return;
@@ -129,5 +128,18 @@ export default function SignIn() {
         </CardBody>
       </Card>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function SignIn() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center dark:bg-neutral-900">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
+      <SignInForm />
+    </Suspense>
   );
 }
