@@ -187,15 +187,15 @@ function ConfirmationContent() {
           </p>
 
           <p className="text-zinc-400 text-sm md:text-base">
-            We'll email you the invoice within 24 hours for easy online payment
+            We&apos;ll email you the invoice within 24 hours for easy online payment
             (credit/debit).
           </p>
 
           <p className="text-zinc-400 text-sm md:text-base">
-            Once payment is received, you'll get a formal confirmation by email.
+            Once payment is received, you&apos;ll get a formal confirmation by email.
           </p>
           <p className="text-zinc-400 text-sm md:text-base">
-            Your driver's name and contact will be shared 1–3 days before your
+            Your driver&apos;s name and contact will be shared 1-3 days before your
             service.
           </p>
 

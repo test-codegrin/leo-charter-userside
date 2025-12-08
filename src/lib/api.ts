@@ -77,7 +77,7 @@ export const authAPI = {
     { headers: { Authorization: `Bearer ${token}` } }
   ),
 
-  confirmBooking: (payload: BookingPayload) => api.post(`/invoice/generate-invoice-send/${payload.tripId}`, payload),
+  confirmBooking: (payload: BookingPayload) => api.post(`/user/confirm-booking/${payload.tripId}`, payload),
   createPaymentIntent: async (payload: {
   amount: number;
   currency?: string;
