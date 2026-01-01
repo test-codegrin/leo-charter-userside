@@ -21,8 +21,9 @@ function ConfirmationContent() {
   const [bookingPayload, setBookingPayload] = useState<BookingPayload | null>(null);
   const [initializing, setInitializing] = useState(true);
 
+  // ✅ Auto-confirm booking on page load
   useEffect(() => {
-    const loadBookingData = () => {
+    const loadAndConfirmBooking = async () => {
       try {
         const token = searchParams.get("data");
         if (!token) {
@@ -39,44 +40,33 @@ function ConfirmationContent() {
         }
 
         setBookingPayload(payload);
-      } catch (err) {
-        console.error("Error loading booking data:", err);
-        setError("Invalid booking link or expired token.");
-      } finally {
         setInitializing(false);
+        
+        // ✅ Automatically confirm booking
+        setLoading(true);
+        
+        const res = await authAPI.confirmBooking(payload);
+
+        if (res?.data?.success || res?.data?.message?.includes("email sent")) {
+          setConfirmed(true);
+          addToast({
+            title: "Booking Confirmed!",
+            description: "Your booking has been confirmed successfully.",
+            color: "success",
+          });
+        } else {
+          setError(res?.data?.message || "Booking confirmation failed.");
+        }
+      } catch (err) {
+        console.error("Error confirming booking:", err);
+        setError("Invalid booking link or confirmation failed.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadBookingData();
+    loadAndConfirmBooking();
   }, [searchParams]);
-
-  // ✅ Confirm booking handler
-  const handleConfirmBooking = async () => {
-    if (!bookingPayload) return;
-
-    try {
-      setLoading(true);
-
-      // ✅ Keep your existing API call
-      const res = await authAPI.confirmBooking(bookingPayload);
-
-      if (res?.data?.success || res?.data?.message?.includes("email sent")) {
-        setConfirmed(true);
-        addToast({
-          title: "Booking Confirmed!",
-          description: "Your booking has been confirmed successfully.",
-          color: "success",
-        });
-      } else {
-        setError(res?.data?.message || "Booking confirmation failed.");
-      }
-    } catch (err) {
-      console.error("Booking confirmation failed:", err);
-      setError("Something went wrong while confirming your booking.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ✅ View booking handler with authentication check
   const handleViewBooking = () => {
@@ -108,23 +98,8 @@ function ConfirmationContent() {
     router.push(tripDetailsPath);
   };
 
-  // ✅ Initial Loading State
-  if (initializing) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-4">
-        <Progress
-          isIndeterminate 
-          aria-label="Loading..." 
-          className="max-w-xs w-full" 
-          size="sm"
-          color="primary"
-        />
-      </div>
-    );
-  }
-
-  // ✅ Processing State (after confirmation clicked)
-  if (loading) {
+  // ✅ Loading State (initial or processing)
+  if (initializing || loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-4">
         <Progress
@@ -134,7 +109,9 @@ function ConfirmationContent() {
           size="sm"
           color="primary"
         />
-        <p className="mt-4 text-zinc-400 text-sm text-center">Processing your booking...</p>
+        <p className="mt-4 text-zinc-400 text-sm text-center">
+          {initializing ? "Loading booking information..." : "Confirming your booking..."}
+        </p>
       </div>
     );
   }
@@ -230,39 +207,7 @@ function ConfirmationContent() {
     );
   }
 
-  // ✅ Simple Confirmation Message with Button
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-4 py-8 md:py-12">
-      <Image
-        src={images.logo}
-        alt="Leo Charter Logo"
-        width={200}
-        height={80}
-        className="object-contain mb-6 md:mb-10 w-auto h-auto max-w-[180px] md:max-w-[250px]"
-        unoptimized
-        priority
-      />
-
-      <div className="max-w-2xl w-full bg-neutral-900 rounded-xl md:rounded-2xl p-6 sm:p-8 md:p-10 space-y-6 md:space-y-8 text-center">
-        <h1 className="font-barlow text-xl sm:text-2xl md:text-3xl font-semibold text-white">
-          Confirm Your Booking
-        </h1>
-
-        <p className="text-zinc-400 text-sm sm:text-base md:text-lg leading-relaxed">
-          Please click the button below to confirm your booking. You will receive a confirmation email with all the details.
-        </p>
-
-        <Button 
-          color="primary" 
-          size="lg"
-          className="w-full font-semibold text-base sm:text-lg h-12 sm:h-14"
-          onPress={handleConfirmBooking}
-        >
-          Confirm Booking
-        </Button>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 // ✅ Wrapper with Suspense
