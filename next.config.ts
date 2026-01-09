@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         hostname: "leo-charter-userside.vercel.app",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "leo-charter-userside-test.vercel.app",
+        pathname: "/**",
+      },
       // Local development
       {
         protocol: "http",
