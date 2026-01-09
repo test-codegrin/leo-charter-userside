@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "test-leo.codegrin.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "leo-charter-userside.vercel.app",
         pathname: "/**",
       },
