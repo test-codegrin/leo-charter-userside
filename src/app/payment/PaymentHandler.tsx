@@ -208,11 +208,14 @@ export default function PaymentHandler() {
         {/* Hidden on mobile, visible from md and up */}
         <div className="hidden md:block">
           {invoiceLink ? (
-            <iframe
-            key={iframeKey}
-              src={invoiceLink}
-              className="flex-1 w-full h-[calc(100vh-150px)] rounded-lg border border-neutral-800 shadow-inner"
-            />
+            <object
+              data={invoiceLink}
+              type="application/pdf"
+              className="w-full h-[calc(100vh-150px)] rounded-lg"
+            >
+              <p>PDF preview not supported. <a href={invoiceLink}>Download</a></p>
+            </object>
+
           ) : (
             <p className="text-gray-400 text-center mt-4">Loading invoice...</p>
           )}
