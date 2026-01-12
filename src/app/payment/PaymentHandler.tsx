@@ -41,7 +41,7 @@ export default function PaymentHandler() {
   const stripe = useStripe();
   const elements = useElements();
   const searchParams = useSearchParams();
-
+  const [iframeKey, setIframeKey] = useState(0);
   const [decoded, setDecoded] = useState<DecodedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -158,12 +158,14 @@ export default function PaymentHandler() {
           paymentIntentId: result.paymentIntent.id,
           userId: decoded.userId,
         });
+      
 
         
-
+    
         setSuccessOpen(true);
         successAudioRef.current?.play();
         setPaymentDone(true);
+        setIframeKey((prev) => prev + 1);
       } else {
         setErrorMsg("Payment not completed. Please retry.");
         setErrorOpen(true);
@@ -207,6 +209,7 @@ export default function PaymentHandler() {
         <div className="hidden md:block">
           {invoiceLink ? (
             <iframe
+            key={iframeKey}
               src={invoiceLink}
               className="flex-1 w-full h-[calc(100vh-150px)] rounded-lg border border-neutral-800 shadow-inner"
             />
