@@ -398,7 +398,7 @@ export default function PaymentHandler() {
     <div className="min-h-screen md:h-screen w-screen flex flex-col md:flex-row bg-[#0B0B0B] text-white overflow-hidden">
       {/* LEFT SIDE - Receipt */}
       <div className="flex-1 p-4 md:p-6 lg:p-10 flex items-center justify-center md:border-r border-neutral-800 overflow-y-auto">
-        <div className="w-full md:w-5/6 lg:w-1/2 bg-palette-bg p-6 md:p-8 lg:p-10 rounded-3xl h-fit flex flex-col">
+        <div className="w-full md:w-5/6 lg:w-2/3 bg-palette-bg p-6 md:p-8 lg:p-10 rounded-3xl h-fit flex flex-col">
           {/* Trip Details - Full Width */}
           <div className="space-y-2 text-xs md:text-sm flex-1">
            <h1 className="text-white text-xl font-semibold">Trip Summary</h1>
@@ -581,7 +581,7 @@ export default function PaymentHandler() {
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Complete Your Payment</h2>
               <div className="flex items-center justify-center gap-2">
                 <p className="text-zinc-400 text-xs md:text-sm">Secure transaction powered by</p>
-                <Image src={images.stripeLogo} alt="Stripe" width={40} height={40} className="md:w-[50px] md:h-[50px]" />
+                <Image src={images.stripeLogo} alt="Stripe" width={40} height={40} className="md:w-[50px]" />
               </div>
             </div>
 
