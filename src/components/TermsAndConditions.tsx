@@ -62,10 +62,7 @@ export default function TermsAndConditions({ className = "" }: TermsAndCondition
             Full refund for cancellations made more than 30 days before the service start date.
           </li>
           <li>
-            50% refund for cancellations made 8 - 30 days prior to the service start date
-          </li>
-          <li>
-            No refund for cancellations made 7 days or within 7 days prior to the service start date.
+            No refund for cancellations made within 30 days prior to the service start date.
           </li>
         </ul>
         <p className="mt-3 text-sm  text-palette-secondary">
