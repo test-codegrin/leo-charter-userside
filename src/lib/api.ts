@@ -72,37 +72,48 @@ export const authAPI = {
   getProfile: (token: string) => api.get("/user/profile", { headers: { Authorization: `Bearer ${token}` } }),
   updateProfile: (payload: Partial<Record<string, string>>, token: string) => api.put("/user/profile", payload, { headers: { Authorization: `Bearer ${token}` } }),
   getUserTrips: (userId: number, token: string, page: number, limit: number) =>
-  api.get(
-    `/user/trips/${userId}?page=${page}&limit=${limit}`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  ),
+    api.get(
+      `/user/trips/${userId}?page=${page}&limit=${limit}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ),
 
   confirmBooking: (payload: BookingPayload) => api.post(`/user/confirm-booking/${payload.tripId}`, payload),
   createPaymentIntent: async (payload: {
-  amount: number;
-  currency?: string;
-  email?: string;
-  description?: string;
-}) => {
-  try {
-    const response = await api.post("/payments/create-payment-intent", {
-      ...payload,
-      currency: payload.currency || "cad",
-    });
-    // ✅ return both full response and data keys
-    return {
-      ...response.data,
-      raw: response,
-    };
-  } catch (error) {
-    console.error("Error creating payment intent:", error);
-    throw error;
-  }
-},
+    paymentToken: string;
+    amount: number;
+    currency?: string;
+    email?: string;
+    description?: string;
+    invoiceId?: number;
+    paymentType?: "deposit" | "full";
+    isDepositStage?: boolean;
+    paymentStage?: string | null;
+  }) => {
+    try {
+      const response = await api.post("/payments/create-payment-intent", {
+        ...payload,
+        currency: payload.currency || "cad",
+      });
+      // ✅ return both full response and data keys
+      return {
+        ...response.data,
+        raw: response,
+      };
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      throw error;
+    }
+  },
   getInvoice: (invoiceId: number) => api.get(`/user/invoice/${invoiceId}`),
-  getTripById:(tripId: number ,token :string) => api.get(`/user/trip-details/${tripId}`,{ headers: { Authorization: `Bearer ${token}` } }),
+  getTripById: (tripId: number, token: string) => api.get(`/user/trip-details/${tripId}`, { headers: { Authorization: `Bearer ${token}` } }),
   getPaymentStatus: (invoiceId: number) => api.get(`/payments/check-payment-status/${invoiceId}`),
-  addPaymentDetails: (payload: { invoiceId: number;  clientSecret: string,paymentIntentId: string,userId: number}) => api.post(`/payments/add-payment-details`, payload),
+  addPaymentDetails: (payload: {
+    invoiceId: number;
+    clientSecret: string;
+    paymentIntentId: string;
+    userId: number;
+    paymentType: "deposit" | "full";
+  }) => api.post(`/payments/add-payment-details`, payload),
 };
 
 export default api;
