@@ -85,6 +85,7 @@ export const authAPI = {
     email?: string;
     description?: string;
     invoiceId?: number;
+    manualInvoiceId?: number;
     paymentType?: "deposit" | "full";
     isDepositStage?: boolean;
     paymentStage?: string | null;
@@ -104,16 +105,53 @@ export const authAPI = {
       throw error;
     }
   },
+  createManualPaymentIntent: async (payload: {
+    paymentToken: string;
+    amount: number;
+    manualInvoiceId: number;
+    currency?: string;
+    email?: string;
+    description?: string;
+    paymentType?: "deposit" | "full";
+    isDepositStage?: boolean;
+    paymentStage?: string | null;
+  }) => {
+    try {
+      const response = await api.post("/payments/create-manual-payment-intent", {
+        ...payload,
+        currency: payload.currency || "cad",
+      });
+      return {
+        ...response.data,
+        raw: response,
+      };
+    } catch (error) {
+      console.error("Error creating manual payment intent:", error);
+      throw error;
+    }
+  },
   getInvoice: (invoiceId: number) => api.get(`/user/invoice/${invoiceId}`),
   getTripById: (tripId: number, token: string) => api.get(`/user/trip-details/${tripId}`, { headers: { Authorization: `Bearer ${token}` } }),
   getPaymentStatus: (invoiceId: number) => api.get(`/payments/check-payment-status/${invoiceId}`),
+  getManualPaymentStatus: (manualInvoiceId: number) =>
+    api.get(`/payments/check-manual-payment-status/${manualInvoiceId}`),
   addPaymentDetails: (payload: {
-    invoiceId: number;
+    invoiceId?: number;
+    manualInvoiceId?: number;
     clientSecret: string;
     paymentIntentId: string;
-    userId: number;
+    userId?: number;
     paymentType: "deposit" | "full";
   }) => api.post(`/payments/add-payment-details`, payload),
+  addManualPaymentDetails: (payload: {
+    manualInvoiceId: number;
+    clientSecret: string;
+    receiptUrl?: string;
+    latestChargeId?: string;
+    paymentIntentId: string;
+    userId?: number;
+    paymentType: "deposit" | "full";
+  }) => api.post(`/payments/add-manual-payment-details`, payload),
 };
 
 export default api;
