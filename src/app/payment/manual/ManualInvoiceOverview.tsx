@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { Button, Spinner } from "@heroui/react";
-import { Download, ExternalLink } from "lucide-react";
+import { CreditCard, Download, ExternalLink } from "lucide-react";
 
 interface ManualPaymentToken {
   manualInvoiceId?: number;
@@ -13,6 +13,7 @@ interface ManualPaymentToken {
 }
 
 export default function ManualInvoiceOverview() {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [loading, setLoading] = useState(true);
@@ -51,11 +52,7 @@ export default function ManualInvoiceOverview() {
     return directPdf || decoded?.invoiceUrl || decoded?.invoiceLink || null;
   }, [searchParams, decoded]);
 
-  useEffect(() => {
-    if (!loading && !error && pdfUrl) {
-      window.location.replace(pdfUrl);
-    }
-  }, [loading, error, pdfUrl]);
+  const redirectQueryString = useMemo(() => searchParams.toString(), [searchParams]);
 
   const handleDownloadPdf = () => {
     if (!pdfUrl) return;
@@ -67,6 +64,13 @@ export default function ManualInvoiceOverview() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handlePayRedirect = () => {
+    const targetUrl = redirectQueryString
+      ? `/payment/manual/pay?${redirectQueryString}`
+      : "/payment/manual/pay";
+    router.push(targetUrl);
   };
 
   if (loading) {
@@ -94,28 +98,36 @@ export default function ManualInvoiceOverview() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-[#e9edf2] px-4">
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm text-center max-w-md w-full">
-        <h1 className="text-lg font-semibold text-slate-900">Opening Invoice PDF</h1>
-        <p className="text-sm text-slate-600 mt-2">If it did not open automatically, use one of these actions.</p>
-        <div className="mt-4 flex items-center justify-center gap-2">
-          <Button
-            color="primary"
-            variant="solid"
-            startContent={<ExternalLink className="w-4 h-4" />}
-            onPress={() => window.location.replace(pdfUrl)}
-          >
-            Open PDF
-          </Button>
-          <Button
-            color="primary"
-            variant="flat"
-            startContent={<Download className="w-4 h-4" />}
-            onPress={handleDownloadPdf}
-          >
-            Download
-          </Button>
-        </div>
+    <div className="h-screen bg-[#e9edf2] flex flex-col">
+      <div className="flex-1 min-h-0 bg-white">
+        <iframe title="Manual Invoice PDF" src={pdfUrl} className="w-full h-full border-0" />
+      </div>
+
+      <div className="p-4 border-t border-slate-200 bg-white flex flex-wrap items-center justify-center gap-2">
+        <Button
+          color="primary"
+          variant="flat"
+          startContent={<ExternalLink className="w-4 h-4" />}
+          onPress={() => window.open(pdfUrl, "_blank", "noopener,noreferrer")}
+        >
+          Open PDF
+        </Button>
+        <Button
+          color="primary"
+          variant="flat"
+          startContent={<Download className="w-4 h-4" />}
+          onPress={handleDownloadPdf}
+        >
+          Download
+        </Button>
+        <Button
+          color="primary"
+          variant="solid"
+          startContent={<CreditCard className="w-4 h-4" />}
+          onPress={handlePayRedirect}
+        >
+          Pay
+        </Button>
       </div>
     </div>
   );
