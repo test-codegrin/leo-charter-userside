@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import { Button, Spinner } from "@heroui/react";
 import { CreditCard, Download, ExternalLink } from "lucide-react";
 
+
 interface ManualPaymentToken {
   manualInvoiceId?: number;
   invoiceUrl?: string;
@@ -19,6 +20,7 @@ export default function ManualInvoiceOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [decoded, setDecoded] = useState<ManualPaymentToken | null>(null);
+  const [liveInvoiceUrl, setLiveInvoiceUrl] = useState<string | null>(null); // ✅ NEW
 
   useEffect(() => {
     const tokenParam = searchParams.get("data");
@@ -37,7 +39,17 @@ export default function ManualInvoiceOverview() {
       }
 
       setDecoded(tokenData);
-      setLoading(false);
+
+      // ✅ NEW: fetch fresh PDF URL from backend
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/invoice/manual-invoice/${tokenData.manualInvoiceId}`)
+        .then(r => r.json())
+        .then(data => {
+          const freshUrl = data?.data?.invoiceLink || data?.invoiceLink || null;
+          if (freshUrl) setLiveInvoiceUrl(freshUrl);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+
     } catch (err) {
       console.error("Failed to decode manual payment token:", err);
       setError("Invalid or expired invoice link");
@@ -45,12 +57,15 @@ export default function ManualInvoiceOverview() {
     }
   }, [searchParams]);
 
+  // ✅ UPDATED: liveInvoiceUrl takes priority over stale token URL
   const pdfUrl = useMemo(() => {
+    if (liveInvoiceUrl) return liveInvoiceUrl;
+
     const directPdf =
       searchParams.get("pdf") || searchParams.get("invoiceUrl") || searchParams.get("invoiceLink");
 
     return directPdf || decoded?.invoiceUrl || decoded?.invoiceLink || null;
-  }, [searchParams, decoded]);
+  }, [searchParams, decoded, liveInvoiceUrl]);
 
   const redirectQueryString = useMemo(() => searchParams.toString(), [searchParams]);
 
