@@ -103,16 +103,38 @@ export default function ManualInvoiceOverview() {
 
   const redirectQueryString = useMemo(() => searchParams.toString(), [searchParams]);
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     if (!pdfUrl) return;
-    const link = document.createElement("a");
-    link.href = pdfUrl;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.download = `manual-invoice-${decoded?.manualInvoiceId ?? "file"}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
+    const filename = `manual-invoice-${decoded?.manualInvoiceId ?? "file"}.pdf`;
+
+    try {
+      const response = await fetch(pdfUrl);
+      if (!response.ok) {
+        throw new Error(`Download failed with status ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback for cases where CORS blocks fetch; still attempts direct download.
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = filename;
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const handlePayRedirect = () => {
