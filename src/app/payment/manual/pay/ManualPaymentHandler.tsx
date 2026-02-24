@@ -9,7 +9,7 @@ import {
   CardCvcElement,
 } from "@stripe/react-stripe-js";
 import { StripeCardNumberElement } from "@stripe/stripe-js";
-import { useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { AxiosError } from "axios";
 import {
@@ -23,7 +23,7 @@ import {
   ModalHeader,
   Spinner,
 } from "@heroui/react";
-import { CheckCircleIcon, FileText } from "lucide-react";
+import { ArrowLeft, CheckCircleIcon, FileText } from "lucide-react";
 import { authAPI } from "@/lib/api";
 
 interface ManualPaymentToken {
@@ -78,6 +78,7 @@ const readNumberFromSources = (
 };
 
 export default function ManualPaymentHandler() {
+  const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
   const searchParams = useSearchParams();
@@ -311,6 +312,13 @@ export default function ManualPaymentHandler() {
     return uiRemaining;
   }, [amountDueNow, uiRemaining]);
 
+  const previewUrl = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("fromPreview");
+    const query = params.toString();
+    return query ? `/payment/manual?${query}` : "/payment/manual";
+  }, [searchParams]);
+
   const handlePayment = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!stripe || !elements || !decoded || !resolvedInvoiceId || !paymentToken) return;
@@ -436,6 +444,22 @@ export default function ManualPaymentHandler() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white p-4 md:p-8">
+      <div className="max-w-6xl mx-auto mb-4">
+        <Button
+          variant="flat"
+          startContent={<ArrowLeft className="w-4 h-4" />}
+          onPress={() => router.push(previewUrl)}
+          isDisabled={isFullyPaid}
+          className="bg-neutral-800 text-white hover:bg-neutral-700"
+        >
+          Back to Preview
+        </Button>
+        {isFullyPaid && (
+          <p className="text-xs text-zinc-500 mt-2">
+            Preview is disabled because this invoice is fully paid.
+          </p>
+        )}
+      </div>
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-5 md:p-6 space-y-4 h-fit">
           <div>
