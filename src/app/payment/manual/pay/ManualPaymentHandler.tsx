@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   useStripe,
   useElements,
@@ -9,9 +9,8 @@ import {
   CardCvcElement,
 } from "@stripe/react-stripe-js";
 import { StripeCardNumberElement } from "@stripe/stripe-js";
-import { useRouter, useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import { AxiosError } from "axios";
 import {
   Button,
   Divider,
@@ -27,22 +26,38 @@ import { ArrowLeft, CheckCircleIcon, FileText } from "lucide-react";
 import { authAPI } from "@/lib/api";
 
 interface ManualPaymentToken {
-  invoiceId?: number;
   manualInvoiceId?: number;
   userId?: number;
   email?: string;
-  totalAmount?: number | string;
+}
+
+interface ManualPaymentStatusPayload {
+  invoiceUrl?: string;
+  invoiceLink?: string;
   invoiceTotal?: number | string;
   totalPaid?: number | string;
   remainingAmount?: number | string;
-  paymentStage?: "deposit" | "remaining" | "full" | "paid" | "partial" | "unpaid";
+  totalAmount?: number | string;
+  paymentStage?: string | null;
+  paymentStatus?: string | null;
+  isFullyPaid?: boolean;
+  canPay?: boolean;
   isDepositStage?: boolean;
-  subtotal?: number | string;
-  gstAmount?: number | string;
-  taxAmount?: number | string;
-  gratuityAmount?: number | string;
-  discountAmount?: number | string;
-  depositAmount?: number | string;
+  receiptUrl?: string | null;
+}
+
+interface ManualPaymentStatus {
+  invoiceUrl: string | null;
+  invoiceTotal: number | null;
+  totalPaid: number | null;
+  remainingAmount: number | null;
+  amountDueNow: number | null;
+  paymentStage: string | null;
+  paymentStatus: string | null;
+  isFullyPaid: boolean;
+  canPay: boolean;
+  isDepositStage: boolean;
+  receiptUrl: string | null;
 }
 
 const parseNumberValue = (value: number | string | null | undefined): number | null => {
@@ -55,26 +70,63 @@ const parseNumberValue = (value: number | string | null | undefined): number | n
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "CAD" }).format(amount);
 
-const readNumberFromSources = (
-  searchParams: ReadonlyURLSearchParams,
-  decoded: ManualPaymentToken | null,
-  keys: string[]
-): number | null => {
-  for (const key of keys) {
-    const raw = searchParams.get(key);
-    if (raw != null) {
-      const parsed = parseNumberValue(raw);
-      if (parsed != null) return parsed;
-    }
+const extractStatusPayload = (rawData: unknown): ManualPaymentStatusPayload => {
+  if (!rawData || typeof rawData !== "object") return {};
+  const dataRecord = rawData as Record<string, unknown>;
+  const nestedData = dataRecord.data;
+  if (nestedData && typeof nestedData === "object") {
+    return nestedData as ManualPaymentStatusPayload;
   }
+  return dataRecord as ManualPaymentStatusPayload;
+};
 
-  const decodedRecord = (decoded ?? {}) as Record<string, unknown>;
-  for (const key of keys) {
-    const parsed = parseNumberValue(decodedRecord[key] as number | string | null | undefined);
-    if (parsed != null) return parsed;
-  }
+const normalizeStatus = (payload: ManualPaymentStatusPayload): ManualPaymentStatus => {
+  const invoiceTotal = parseNumberValue(payload.invoiceTotal);
+  const totalPaid = parseNumberValue(payload.totalPaid);
+  const remainingAmount = parseNumberValue(payload.remainingAmount);
+  const amountDueNow = parseNumberValue(payload.totalAmount) ?? remainingAmount;
+  const paymentStage = typeof payload.paymentStage === "string" ? payload.paymentStage : null;
+  const paymentStatus = typeof payload.paymentStatus === "string" ? payload.paymentStatus : null;
 
-  return null;
+  const statusKind = (paymentStatus ?? paymentStage ?? "").toLowerCase();
+  const inferredPaid = (remainingAmount != null && remainingAmount <= 0) || statusKind === "paid";
+  const isFullyPaid = typeof payload.isFullyPaid === "boolean" ? payload.isFullyPaid : inferredPaid;
+  const canPay = typeof payload.canPay === "boolean" ? payload.canPay : !isFullyPaid;
+  const invoiceUrl =
+    typeof payload.invoiceUrl === "string"
+      ? payload.invoiceUrl
+      : typeof payload.invoiceLink === "string"
+        ? payload.invoiceLink
+        : null;
+  const receiptUrl = typeof payload.receiptUrl === "string" ? payload.receiptUrl : null;
+
+  return {
+    invoiceUrl,
+    invoiceTotal,
+    totalPaid,
+    remainingAmount,
+    amountDueNow,
+    paymentStage,
+    paymentStatus,
+    isFullyPaid,
+    canPay,
+    isDepositStage: Boolean(payload.isDepositStage),
+    receiptUrl,
+  };
+};
+
+const EMPTY_STATUS: ManualPaymentStatus = {
+  invoiceUrl: null,
+  invoiceTotal: null,
+  totalPaid: null,
+  remainingAmount: null,
+  amountDueNow: null,
+  paymentStage: null,
+  paymentStatus: null,
+  isFullyPaid: false,
+  canPay: true,
+  isDepositStage: false,
+  receiptUrl: null,
 };
 
 export default function ManualPaymentHandler() {
@@ -85,24 +137,13 @@ export default function ManualPaymentHandler() {
 
   const [decoded, setDecoded] = useState<ManualPaymentToken | null>(null);
   const [paymentToken, setPaymentToken] = useState<string | null>(null);
+  const [status, setStatus] = useState<ManualPaymentStatus>(EMPTY_STATUS);
 
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [cardReady, setCardReady] = useState(false);
-  const [isFullyPaid, setIsFullyPaid] = useState(false);
-  const [canPay, setCanPay] = useState(true);
-  const [paymentStage, setPaymentStage] = useState<string | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
-  const [isDepositStage, setIsDepositStage] = useState(false);
-
-  const [amountDueNow, setAmountDueNow] = useState<number | null>(null);
-  const [invoiceTotal, setInvoiceTotal] = useState<number | null>(null);
-  const [totalPaid, setTotalPaid] = useState<number | null>(null);
-  const [remainingAmount, setRemainingAmount] = useState<number | null>(null);
-  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
-
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -111,16 +152,13 @@ export default function ManualPaymentHandler() {
 
   const resolvedInvoiceId = useMemo(() => {
     if (!decoded) return null;
-    return decoded.manualInvoiceId ?? decoded.invoiceId ?? null;
+    return decoded.manualInvoiceId ?? null;
   }, [decoded]);
 
   const stageKind = useMemo(() => {
-    if (isDepositStage) return "deposit";
-    if (paymentStage) return paymentStage.toLowerCase();
-    if (paymentStatus) return paymentStatus.toLowerCase();
-    if (decoded?.paymentStage) return decoded.paymentStage.toLowerCase();
-    return null;
-  }, [isDepositStage, paymentStage, paymentStatus, decoded?.paymentStage]);
+    const raw = status.paymentStage ?? status.paymentStatus;
+    return raw ? raw.toLowerCase() : null;
+  }, [status.paymentStage, status.paymentStatus]);
 
   const stageTitle = useMemo(() => {
     if (stageKind === "deposit") return "Deposit due now";
@@ -130,29 +168,55 @@ export default function ManualPaymentHandler() {
     return "Amount due now";
   }, [stageKind]);
 
-  const subtotal = useMemo(
-    () => readNumberFromSources(searchParams, decoded, ["subtotal"]),
-    [searchParams, decoded]
-  );
+  const uiInvoiceTotal = useMemo(() => {
+    if (status.invoiceTotal != null) return Math.max(status.invoiceTotal, 0);
+    return Math.max((status.totalPaid ?? 0) + (status.remainingAmount ?? 0), 0);
+  }, [status.invoiceTotal, status.totalPaid, status.remainingAmount]);
 
-  const taxAmount = useMemo(
-    () => readNumberFromSources(searchParams, decoded, ["gstAmount", "taxAmount", "gst", "tax"]),
-    [searchParams, decoded]
-  );
+  const uiTotalPaid = useMemo(() => Math.max(status.totalPaid ?? 0, 0), [status.totalPaid]);
 
-  const gratuityAmount = useMemo(
-    () => readNumberFromSources(searchParams, decoded, ["gratuityAmount"]),
-    [searchParams, decoded]
-  );
+  const uiRemaining = useMemo(() => {
+    if (status.remainingAmount != null) return Math.max(status.remainingAmount, 0);
+    return Math.max(uiInvoiceTotal - uiTotalPaid, 0);
+  }, [status.remainingAmount, uiInvoiceTotal, uiTotalPaid]);
 
-  const discountAmount = useMemo(
-    () => readNumberFromSources(searchParams, decoded, ["discountAmount"]),
-    [searchParams, decoded]
-  );
+  const uiAmountDueNow = useMemo(() => {
+    if (status.amountDueNow != null) return Math.max(status.amountDueNow, 0);
+    return uiRemaining;
+  }, [status.amountDueNow, uiRemaining]);
 
-  const depositAmount = useMemo(
-    () => readNumberFromSources(searchParams, decoded, ["depositAmount"]),
-    [searchParams, decoded]
+  const previewUrl = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("fromPreview");
+    const query = params.toString();
+    return query ? `/payment/manual?${query}` : "/payment/manual";
+  }, [searchParams]);
+
+  const fetchLatestStatus = useCallback(
+    async (manualInvoiceId: number, options?: { silent?: boolean }) => {
+      const silent = Boolean(options?.silent);
+
+      if (!silent) {
+        setLoading(true);
+      }
+
+      try {
+        const res = await authAPI.getManualPaymentStatus(manualInvoiceId);
+        const payload = extractStatusPayload(res.data);
+        setStatus(normalizeStatus(payload));
+        setError(null);
+      } catch (statusErr) {
+        console.error("Failed to fetch latest manual payment status:", statusErr);
+        if (!silent) {
+          setError("Failed to check manual payment status");
+        }
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
+    },
+    []
   );
 
   useEffect(() => {
@@ -167,161 +231,53 @@ export default function ManualPaymentHandler() {
     setPaymentToken(token);
 
     try {
-      const decodedData = jwtDecode<ManualPaymentToken>(token);
-      const linkedInvoiceId = parseNumberValue(decodedData.manualInvoiceId ?? decodedData.invoiceId);
-      const isManualOnlyFlow = Boolean(decodedData.manualInvoiceId) && !decodedData.invoiceId;
+      // Decode on client only for invoice lookup identity.
+      const tokenData = jwtDecode<ManualPaymentToken>(token);
+      const linkedInvoiceId = parseNumberValue(tokenData.manualInvoiceId);
 
       if (!linkedInvoiceId) {
-        throw new Error("Missing invoice identifier in payment token");
+        throw new Error("Missing manualInvoiceId in token");
       }
 
-      const tokenAmountDue =
-        readNumberFromSources(searchParams, decodedData, ["totalAmount"]) ??
-        readNumberFromSources(searchParams, decodedData, ["remainingAmount"]);
-      const tokenRemaining =
-        readNumberFromSources(searchParams, decodedData, ["remainingAmount"]) ?? tokenAmountDue;
-      const tokenPaid = readNumberFromSources(searchParams, decodedData, ["totalPaid"]);
-      const tokenInvoiceTotal =
-        readNumberFromSources(searchParams, decodedData, ["invoiceTotal"]) ??
-        (tokenAmountDue ?? 0) + (tokenPaid ?? 0);
+      setDecoded({
+        manualInvoiceId: linkedInvoiceId,
+        userId: tokenData.userId,
+        email: tokenData.email,
+      });
 
-      const tokenStage = decodedData.paymentStage ?? null;
-      const tokenIsDeposit = Boolean(decodedData.isDepositStage) || decodedData.paymentStage === "deposit";
-      const tokenIsPaid =
-        decodedData.paymentStage === "paid" ||
-        (tokenRemaining != null && tokenRemaining <= 0) ||
-        (tokenAmountDue != null && tokenAmountDue <= 0);
-
-      setDecoded(decodedData);
-      setAmountDueNow(tokenAmountDue);
-      setRemainingAmount(tokenRemaining);
-      setTotalPaid(tokenPaid);
-      setInvoiceTotal(tokenInvoiceTotal);
-      setPaymentStage(tokenStage);
-      setPaymentStatus(null);
-      setIsDepositStage(tokenIsDeposit);
-      setIsFullyPaid(tokenIsPaid);
-      setCanPay(!tokenIsPaid);
-
-      if (isManualOnlyFlow) {
-        (async () => {
-          try {
-            const res = await authAPI.getManualPaymentStatus(linkedInvoiceId);
-            const statusData = res.data || {};
-
-            const parsedAmountDue = parseNumberValue(statusData.totalAmount);
-            const parsedRemaining = parseNumberValue(statusData.remainingAmount);
-            const parsedPaid = parseNumberValue(statusData.totalPaid);
-            const parsedInvoiceTotal = parseNumberValue(statusData.invoiceTotal);
-
-            setIsFullyPaid(statusData.isFullyPaid ?? tokenIsPaid);
-            setCanPay(statusData.canPay ?? !tokenIsPaid);
-            setAmountDueNow(parsedAmountDue ?? tokenAmountDue);
-            setRemainingAmount(parsedRemaining ?? tokenRemaining);
-            setTotalPaid(parsedPaid ?? tokenPaid);
-            setInvoiceTotal(parsedInvoiceTotal ?? tokenInvoiceTotal);
-            setPaymentStage(statusData.paymentStage ?? statusData.paymentStatus ?? tokenStage);
-            setPaymentStatus(statusData.paymentStatus ?? null);
-            setIsDepositStage(statusData.isDepositStage ?? tokenIsDeposit);
-            setReceiptUrl(statusData.receiptUrl ?? null);
-          } catch (err) {
-            if ((err as AxiosError).response?.status === 404) {
-              setIsFullyPaid(tokenIsPaid);
-              setCanPay(!tokenIsPaid);
-              setAmountDueNow(tokenAmountDue);
-              setRemainingAmount(tokenRemaining);
-              setTotalPaid(tokenPaid);
-              setInvoiceTotal(tokenInvoiceTotal);
-              setPaymentStage(tokenStage);
-              setPaymentStatus(null);
-              setIsDepositStage(tokenIsDeposit);
-              setReceiptUrl(null);
-            } else {
-              setError("Failed to check manual payment status");
-            }
-          } finally {
-            setLoading(false);
-          }
-        })();
-        return;
-      }
-
-      (async () => {
-        try {
-          const res = await authAPI.getPaymentStatus(linkedInvoiceId);
-          const statusData = res.data || {};
-
-          const parsedAmountDue = parseNumberValue(statusData.totalAmount);
-          const parsedRemaining = parseNumberValue(statusData.remainingAmount);
-          const parsedPaid = parseNumberValue(statusData.totalPaid);
-          const parsedInvoiceTotal = parseNumberValue(statusData.invoiceTotal);
-
-          setIsFullyPaid(statusData.isFullyPaid ?? tokenIsPaid);
-          setCanPay(statusData.canPay ?? !tokenIsPaid);
-          setAmountDueNow(parsedAmountDue ?? tokenAmountDue);
-          setRemainingAmount(parsedRemaining ?? tokenRemaining);
-          setTotalPaid(parsedPaid ?? tokenPaid);
-          setInvoiceTotal(parsedInvoiceTotal ?? tokenInvoiceTotal);
-          setPaymentStage(statusData.paymentStage ?? statusData.paymentStatus ?? tokenStage);
-          setPaymentStatus(statusData.paymentStatus ?? null);
-          setIsDepositStage(statusData.isDepositStage ?? tokenIsDeposit);
-          setReceiptUrl(statusData.receiptUrl ?? null);
-        } catch (err) {
-          if ((err as AxiosError).response?.status === 404) {
-            setIsFullyPaid(tokenIsPaid);
-            setCanPay(!tokenIsPaid);
-            setAmountDueNow(tokenAmountDue);
-            setRemainingAmount(tokenRemaining);
-            setTotalPaid(tokenPaid);
-            setInvoiceTotal(tokenInvoiceTotal);
-            setPaymentStage(tokenStage);
-            setPaymentStatus(null);
-            setIsDepositStage(tokenIsDeposit);
-            setReceiptUrl(null);
-          } else {
-            setError("Failed to check payment status");
-          }
-        } finally {
-          setLoading(false);
-        }
-      })();
-    } catch (err) {
-      console.error("JWT decode failed:", err);
+      void fetchLatestStatus(linkedInvoiceId);
+    } catch (decodeErr) {
+      console.error("JWT decode failed:", decodeErr);
       setError("Invalid or expired payment link");
       setLoading(false);
     }
-  }, [searchParams]);
+  }, [fetchLatestStatus, searchParams]);
 
-  const uiInvoiceTotal = useMemo(() => {
-    if (invoiceTotal != null) return invoiceTotal;
-    if (subtotal != null) {
-      return subtotal + (taxAmount ?? 0) + (gratuityAmount ?? 0) - (discountAmount ?? 0);
-    }
-    return 0;
-  }, [invoiceTotal, subtotal, taxAmount, gratuityAmount, discountAmount]);
+  useEffect(() => {
+    if (!resolvedInvoiceId) return;
 
-  const uiTotalPaid = totalPaid ?? 0;
+    const onWindowFocus = () => {
+      void fetchLatestStatus(resolvedInvoiceId, { silent: true });
+    };
 
-  const uiRemaining = useMemo(() => {
-    if (remainingAmount != null) return remainingAmount;
-    return Math.max(uiInvoiceTotal - uiTotalPaid, 0);
-  }, [remainingAmount, uiInvoiceTotal, uiTotalPaid]);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void fetchLatestStatus(resolvedInvoiceId, { silent: true });
+      }
+    };
 
-  const uiAmountDueNow = useMemo(() => {
-    if (amountDueNow != null) return amountDueNow;
-    return uiRemaining;
-  }, [amountDueNow, uiRemaining]);
+    window.addEventListener("focus", onWindowFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
-  const previewUrl = useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("fromPreview");
-    const query = params.toString();
-    return query ? `/payment/manual?${query}` : "/payment/manual";
-  }, [searchParams]);
+    return () => {
+      window.removeEventListener("focus", onWindowFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [fetchLatestStatus, resolvedInvoiceId]);
 
   const handlePayment = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!stripe || !elements || !decoded || !resolvedInvoiceId || !paymentToken) return;
+    if (!stripe || !elements || !resolvedInvoiceId || !paymentToken) return;
 
     const card = cardRef.current;
     if (!card) {
@@ -330,25 +286,22 @@ export default function ManualPaymentHandler() {
       return;
     }
 
+    if (uiAmountDueNow <= 0) {
+      setErrorMsg("No payable amount remaining for this invoice.");
+      setErrorOpen(true);
+      return;
+    }
+
     setProcessing(true);
     setErrorMsg("");
 
     try {
-      const amount = Number(uiAmountDueNow);
-      if (!Number.isFinite(amount) || amount <= 0) {
-        throw new Error("Invalid amount");
-      }
-
       const res = await authAPI.createManualPaymentIntent({
         paymentToken,
-        amount,
-        manualInvoiceId: decoded.manualInvoiceId ?? resolvedInvoiceId,
+        manualInvoiceId: resolvedInvoiceId,
         currency: "cad",
-        email: decoded.email,
-        description: `Manual invoice #${resolvedInvoiceId} ${stageTitle}`,
-        paymentType: isDepositStage ? "deposit" : "full",
-        isDepositStage,
-        paymentStage: stageKind ?? decoded.paymentStage ?? null,
+        email: decoded?.email,
+        description: `Manual invoice #${resolvedInvoiceId}`,
       });
 
       const clientSecret = res?.clientSecret || res?.data?.clientSecret;
@@ -357,7 +310,7 @@ export default function ManualPaymentHandler() {
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card,
-          billing_details: { email: decoded.email || "" },
+          billing_details: { email: decoded?.email || "" },
         },
       });
 
@@ -370,48 +323,25 @@ export default function ManualPaymentHandler() {
           charges?: { data?: Array<{ receipt_url?: string | null }> };
         };
 
-        const stripeReceiptUrl =
-          paymentIntentForReceipt.charges?.data?.[0]?.receipt_url ?? null;
+        const stripeReceiptUrl = paymentIntentForReceipt.charges?.data?.[0]?.receipt_url ?? null;
         const latestChargeId = paymentIntentForReceipt.latest_charge ?? null;
 
         await authAPI.addManualPaymentDetails({
-          manualInvoiceId: decoded.manualInvoiceId ?? resolvedInvoiceId,
+          manualInvoiceId: resolvedInvoiceId,
           clientSecret,
           receiptUrl: stripeReceiptUrl ?? undefined,
           latestChargeId: latestChargeId ?? undefined,
           paymentIntentId: result.paymentIntent.id,
-          userId: decoded.userId,
-          paymentType: isDepositStage ? "deposit" : "full",
+          userId: decoded?.userId,
+          paymentType: status.isDepositStage ? "deposit" : "full",
         });
 
-        try {
-          const statusRes = await authAPI.getManualPaymentStatus(
-            decoded.manualInvoiceId ?? resolvedInvoiceId
+        await fetchLatestStatus(resolvedInvoiceId, { silent: true });
+        if (stripeReceiptUrl) {
+          setStatus((previous) =>
+            previous.receiptUrl ? previous : { ...previous, receiptUrl: stripeReceiptUrl }
           );
-          const statusData = statusRes.data || {};
-
-          const parsedAmountDue = parseNumberValue(statusData.totalAmount);
-          const parsedRemaining = parseNumberValue(statusData.remainingAmount);
-          const parsedPaid = parseNumberValue(statusData.totalPaid);
-          const parsedInvoiceTotal = parseNumberValue(statusData.invoiceTotal);
-
-          setIsFullyPaid(Boolean(statusData.isFullyPaid));
-          setCanPay(statusData.canPay ?? !Boolean(statusData.isFullyPaid));
-          setAmountDueNow(parsedAmountDue);
-          setRemainingAmount(parsedRemaining);
-          setTotalPaid(parsedPaid);
-          setInvoiceTotal(parsedInvoiceTotal);
-          setPaymentStage(statusData.paymentStage ?? statusData.paymentStatus ?? null);
-          setPaymentStatus(statusData.paymentStatus ?? null);
-          setIsDepositStage(Boolean(statusData.isDepositStage));
-          setReceiptUrl(statusData.receiptUrl ?? stripeReceiptUrl ?? null);
-        } catch (statusErr) {
-          console.warn("Failed to refresh manual payment status after success:", statusErr);
-          if (stripeReceiptUrl) {
-            setReceiptUrl(stripeReceiptUrl);
-          }
         }
-
         setSuccessOpen(true);
       } else {
         setErrorMsg("Payment not completed. Please retry.");
@@ -449,117 +379,84 @@ export default function ManualPaymentHandler() {
           variant="flat"
           startContent={<ArrowLeft className="w-4 h-4" />}
           onPress={() => router.push(previewUrl)}
-          isDisabled={isFullyPaid}
+          isDisabled={status.isFullyPaid}
           className="bg-neutral-800 text-white hover:bg-neutral-700"
         >
-          Back to Preview
+          Back to Invoice
         </Button>
-        {isFullyPaid && (
-          <p className="text-xs text-zinc-500 mt-2">
-            Preview is disabled because this invoice is fully paid.
-          </p>
-        )}
       </div>
+
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-5 md:p-6 space-y-4 h-fit">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Manual Invoice</p>
-            <h1 className="text-xl md:text-2xl font-semibold mt-1">#{resolvedInvoiceId}</h1>
+        <div>
+          <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-5 md:p-6 space-y-4 h-fit">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Invoice</p>
+              <h1 className="text-xl md:text-2xl font-semibold mt-1">#{resolvedInvoiceId}</h1>
+            </div>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between gap-2">
+                <span className="text-zinc-400">Customer Email</span>
+                <span className="text-right break-all">{decoded?.email || "-"}</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-zinc-400">Payment Stage</span>
+                <span>{status.paymentStage || "-"}</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-zinc-400">Payment Status</span>
+                <span>{status.paymentStatus || (status.isFullyPaid ? "paid" : "pending")}</span>
+              </div>
+            </div>
+
+            <Divider className="bg-white/10" />
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between gap-2 pt-2 border-t border-white/10">
+                <span className="text-zinc-400">Invoice Total</span>
+                <span className="text-green-400 font-semibold">{formatCurrency(uiInvoiceTotal)}</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-zinc-400">Total Paid</span>
+                <span>{formatCurrency(uiTotalPaid)}</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-zinc-400">Remaining</span>
+                <span>{formatCurrency(uiRemaining)}</span>
+              </div>
+              <div className="flex justify-between gap-2 pt-2 border-t border-white/10 text-base font-semibold">
+                <span>{stageTitle}</span>
+                <span>{formatCurrency(uiAmountDueNow)}</span>
+              </div>
+            </div>
+
+            {status.receiptUrl && (
+              <Button
+                variant="flat"
+                className="w-full"
+                startContent={<FileText className="w-4 h-4" />}
+                onPress={() => status.receiptUrl && window.open(status.receiptUrl, "_blank")}
+              >
+                View Last Stripe Receipt
+              </Button>
+            )}
           </div>
-
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between gap-2">
-              <span className="text-zinc-400">Customer Email</span>
-              <span className="text-right break-all">{decoded?.email || "-"}</span>
-            </div>
-            <div className="flex justify-between gap-2">
-              <span className="text-zinc-400">Status</span>
-              <span>{isFullyPaid ? "Paid" : "Pending"}</span>
-            </div>
-          </div>
-
-          <Divider className="bg-white/10" />
-
-          <div className="space-y-2 text-sm">
-            {subtotal != null && (
-              <div className="flex justify-between gap-2">
-                <span className="text-zinc-400">Subtotal</span>
-                <span>{formatCurrency(subtotal)}</span>
-              </div>
-            )}
-
-            {taxAmount != null && (
-              <div className="flex justify-between gap-2">
-                <span className="text-zinc-400">GST / Tax</span>
-                <span>{formatCurrency(taxAmount)}</span>
-              </div>
-            )}
-
-            {gratuityAmount != null && (
-              <div className="flex justify-between gap-2">
-                <span className="text-zinc-400">Gratuity</span>
-                <span>{formatCurrency(gratuityAmount)}</span>
-              </div>
-            )}
-
-            {discountAmount != null && (
-              <div className="flex justify-between gap-2">
-                <span className="text-zinc-400">Discount</span>
-                <span>- {formatCurrency(discountAmount)}</span>
-              </div>
-            )}
-
-            {depositAmount != null && (
-              <div className="flex justify-between gap-2">
-                <span className="text-zinc-400">Deposit</span>
-                <span>{formatCurrency(depositAmount)}</span>
-              </div>
-            )}
-
-            <div className="flex justify-between gap-2 pt-2 border-t border-white/10">
-              <span className="text-zinc-400">Invoice Total</span>
-              <span className="text-green-400 font-semibold">{formatCurrency(uiInvoiceTotal)}</span>
-            </div>
-            <div className="flex justify-between gap-2">
-              <span className="text-zinc-400">Total Paid</span>
-              <span>{formatCurrency(uiTotalPaid)}</span>
-            </div>
-            <div className="flex justify-between gap-2">
-              <span className="text-zinc-400">Remaining</span>
-              <span>{formatCurrency(uiRemaining)}</span>
-            </div>
-            <div className="flex justify-between gap-2 pt-2 border-t border-white/10 text-base font-semibold">
-              <span>{stageTitle}</span>
-              <span>{formatCurrency(uiAmountDueNow)}</span>
-            </div>
-          </div>
-
-          {receiptUrl && (
-            <Button
-              variant="flat"
-              className="w-full"
-              startContent={<FileText className="w-4 h-4" />}
-              onPress={() => window.open(receiptUrl, "_blank")}
-            >
-              View Last Stripe Receipt
-            </Button>
-          )}
         </div>
 
         <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-5 md:p-6">
-          {isFullyPaid ? (
+          {status.isFullyPaid ? (
             <div className="text-center py-8 flex flex-col items-center justify-center gap-4 text-green-400">
               <CheckCircleIcon className="w-12 h-12" />
               <p className="font-semibold">Payment has already been completed for this invoice.</p>
             </div>
-          ) : !canPay ? (
+          ) : !status.canPay ? (
             <div className="text-center py-8 text-zinc-400">
               Payment is not currently available for this invoice.
             </div>
           ) : (
             <>
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Pay Manual Invoice</h2>
+                <h2 className="text-2xl font-bold text-white">Pay Invoice</h2>
                 <p className="text-zinc-400 text-sm mt-1">Secure transaction powered by Stripe</p>
               </div>
 
@@ -638,13 +535,13 @@ export default function ManualPaymentHandler() {
             Payment Successful
           </ModalHeader>
           <ModalBody>
-            <p className="text-zinc-300">Payment for manual invoice #{resolvedInvoiceId} was successful.</p>
-            {receiptUrl && (
+            <p className="text-zinc-300">Payment for invoice #{resolvedInvoiceId} was successful.</p>
+            {status.receiptUrl && (
               <Button
                 variant="flat"
                 className="w-full mt-3"
                 startContent={<FileText className="w-4 h-4" />}
-                onPress={() => window.open(receiptUrl, "_blank")}
+                onPress={() => status.receiptUrl && window.open(status.receiptUrl, "_blank")}
               >
                 View Stripe Receipt
               </Button>

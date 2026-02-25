@@ -107,7 +107,7 @@ export const authAPI = {
   },
   createManualPaymentIntent: async (payload: {
     paymentToken: string;
-    amount: number;
+    amount?: number;
     manualInvoiceId: number;
     currency?: string;
     email?: string;
@@ -117,9 +117,11 @@ export const authAPI = {
     paymentStage?: string | null;
   }) => {
     try {
+      const { amount, ...restPayload } = payload;
       const response = await api.post("/payments/create-manual-payment-intent", {
-        ...payload,
-        currency: payload.currency || "cad",
+        ...restPayload,
+        ...(amount != null ? { amount } : {}),
+        currency: restPayload.currency || "cad",
       });
       return {
         ...response.data,
