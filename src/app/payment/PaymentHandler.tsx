@@ -534,7 +534,17 @@ export default function PaymentHandler() {
   return (
     <div className="min-h-screen md:h-screen w-screen flex flex-col md:flex-row bg-[#0B0B0B] text-white overflow-hidden">
       {/* LEFT SIDE - Receipt */}
-      <div className="flex-1 p-4 md:p-6 lg:p-10 flex items-center justify-center md:border-r border-neutral-800 overflow-y-auto overflow-x-hidden min-w-0">
+      <div className="relative flex-1 p-4 md:p-6 lg:p-10 flex items-center justify-center md:border-r border-neutral-800 overflow-y-auto overflow-x-hidden min-w-0">
+        <div className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 z-10">
+          <Image
+            src={images.logo}
+            alt="Leo Charter"
+            width={200}
+            height={58}
+            className="h-auto w-[145px] md:w-[175px] lg:w-[200px]"
+            priority
+          />
+        </div>
         <div className="w-full md:w-5/6 lg:w-2/3 bg-palette-bg p-6 md:p-8 lg:p-10 rounded-3xl h-fit flex flex-col">
           <div className="space-y-2 text-xs md:text-sm flex-1 break-words">
             <h1 className="text-white text-xl font-semibold">Trip Summary</h1>

@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
 import { Button, Spinner } from "@heroui/react";
 import { CreditCard, Download, ExternalLink } from "lucide-react";
+import { images } from "@/lib/assets";
 
 const PdfPreview = dynamic(() => import("./PdfPreview"), {
   ssr: false,
@@ -184,7 +186,17 @@ export default function ManualInvoiceOverview() {
 
   if (previewDisabled) {
     return (
-      <div className="h-screen bg-[#0A0A0A] text-white flex items-center justify-center px-4">
+      <div className="relative h-screen bg-[#0A0A0A] text-white flex items-center justify-center px-4">
+        <div className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 z-10">
+          <Image
+            src={images.logo}
+            alt="Leo Charter"
+            width={200}
+            height={58}
+            className="h-auto w-[145px] md:w-[175px] lg:w-[200px]"
+            priority
+          />
+        </div>
         <div className="max-w-lg w-full rounded-2xl border border-neutral-800 bg-neutral-900/70 p-6 text-center space-y-4">
           <h2 className="text-xl font-semibold">Invoice Preview Disabled</h2>
           <p className="text-zinc-300">
@@ -200,8 +212,18 @@ export default function ManualInvoiceOverview() {
   }
 
   return (
-    <div className="h-screen bg-[#0A0A0A] text-white flex flex-col">
-      <div className="flex-1 min-h-0 bg-[#0A0A0A] overflow-x-auto overflow-y-auto p-3 md:p-6">
+    <div className="relative h-screen bg-[#0A0A0A] text-white flex flex-col">
+      <div className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 z-10">
+        <Image
+          src={images.logo}
+          alt="Leo Charter"
+          width={200}
+          height={58}
+          className="h-auto w-[145px] md:w-[175px] lg:w-[200px]"
+          priority
+        />
+      </div>
+      <div className="flex-1 min-h-0 bg-[#0A0A0A] overflow-x-auto overflow-y-auto p-3 md:p-6 pt-16 md:pt-20 lg:pt-24">
         <div className="mx-auto min-w-[920px] w-fit flex flex-col items-center gap-4 rounded-2xl border border-neutral-800 bg-neutral-900/70 p-4">
           <PdfPreview
             file={pdfUrl}

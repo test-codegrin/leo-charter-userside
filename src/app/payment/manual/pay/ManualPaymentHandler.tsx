@@ -22,8 +22,10 @@ import {
   ModalHeader,
   Spinner,
 } from "@heroui/react";
+import Image from "next/image";
 import { ArrowLeft, CheckCircleIcon, FileText } from "lucide-react";
 import { authAPI } from "@/lib/api";
+import { images } from "@/lib/assets";
 
 interface ManualPaymentToken {
   manualInvoiceId?: number;
@@ -373,7 +375,18 @@ export default function ManualPaymentHandler() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white p-4 md:p-8">
+    <div className="relative min-h-screen bg-[#0A0A0A] text-white p-4 md:p-8 pt-16 md:pt-20 lg:pt-24">
+      <div className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 z-10">
+        <Image
+          src={images.logo}
+          alt="Leo Charter"
+          width={200}
+          height={58}
+          className="h-auto w-[145px] md:w-[175px] lg:w-[200px]"
+          priority
+        />
+      </div>
+
       <div className="max-w-6xl mx-auto mb-4">
         <Button
           variant="flat"
@@ -399,17 +412,7 @@ export default function ManualPaymentHandler() {
                 <span className="text-zinc-400">Customer Email</span>
                 <span className="text-right break-all">{decoded?.email || "-"}</span>
               </div>
-              <div className="flex justify-between gap-2">
-                <span className="text-zinc-400">Payment Stage</span>
-                <span>{status.paymentStage || "-"}</span>
-              </div>
-              <div className="flex justify-between gap-2">
-                <span className="text-zinc-400">Payment Status</span>
-                <span>{status.paymentStatus || (status.isFullyPaid ? "paid" : "pending")}</span>
-              </div>
             </div>
-
-            <Divider className="bg-white/10" />
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between gap-2 pt-2 border-t border-white/10">
