@@ -185,12 +185,20 @@ export default function ManualPaymentHandler() {
     return uiRemaining;
   }, [status.amountDueNow, uiRemaining]);
 
+  const cameFromPreview = useMemo(() => searchParams.get("fromPreview") === "1", [searchParams]);
+
   const previewUrl = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("fromPreview");
     const query = params.toString();
     return query ? `/payment/manual?${query}` : "/payment/manual";
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!cameFromPreview) {
+      router.replace(previewUrl);
+    }
+  }, [cameFromPreview, previewUrl, router]);
 
   const fetchLatestStatus = useCallback(
     async (manualInvoiceId: number, options?: { silent?: boolean }) => {
@@ -220,6 +228,10 @@ export default function ManualPaymentHandler() {
   );
 
   useEffect(() => {
+    if (!cameFromPreview) {
+      return;
+    }
+
     const tokenParam = searchParams.get("data");
     if (!tokenParam) {
       setError("Invalid payment link");
@@ -251,7 +263,7 @@ export default function ManualPaymentHandler() {
       setError("Invalid or expired payment link");
       setLoading(false);
     }
-  }, [fetchLatestStatus, searchParams]);
+  }, [cameFromPreview, fetchLatestStatus, searchParams]);
 
   useEffect(() => {
     if (!resolvedInvoiceId) return;
