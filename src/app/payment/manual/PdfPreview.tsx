@@ -26,9 +26,9 @@ export default function PdfPreview({ file, numPages, onLoadSuccess, onLoadError,
       error={<p className="text-red-400 text-sm">{errorMessage}</p>}
       className="w-full flex justify-center"
     >
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-0">
         {Array.from(new Array(numPages), (_, index) => (
-          <Page key={`page_${index + 1}`} pageNumber={index + 1} width={900} />
+          <Page key={`page_${index + 1}`} pageNumber={index + 1} width={900} className="block" />
         ))}
       </div>
     </Document>
