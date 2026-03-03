@@ -187,6 +187,11 @@ export default function ManualPaymentHandler() {
     return uiRemaining;
   }, [status.amountDueNow, uiRemaining]);
 
+  const showAmountDueNowRow = useMemo(() => {
+    const isDuplicateRemainingStage = (stageKind === "remaining" || stageKind === "partial") && uiAmountDueNow === uiRemaining;
+    return !isDuplicateRemainingStage;
+  }, [stageKind, uiAmountDueNow, uiRemaining]);
+
   const cameFromPreview = useMemo(() => searchParams.get("fromPreview") === "1", [searchParams]);
 
   const previewUrl = useMemo(() => {
@@ -435,14 +440,20 @@ export default function ManualPaymentHandler() {
                 <span className="text-zinc-400">Total Paid</span>
                 <span>{formatCurrency(uiTotalPaid)}</span>
               </div>
-              <div className="flex justify-between gap-2">
-                <span className="text-zinc-400">Remaining</span>
+              <div
+                className={`flex justify-between gap-2 ${
+                  !showAmountDueNowRow ? "pt-2 border-t border-white/10 text-base font-semibold" : ""
+                }`}
+              >
+                <span className={!showAmountDueNowRow ? "text-white" : "text-zinc-400"}>Remaining</span>
                 <span>{formatCurrency(uiRemaining)}</span>
               </div>
-              <div className="flex justify-between gap-2 pt-2 border-t border-white/10 text-base font-semibold">
-                <span>{stageTitle}</span>
-                <span>{formatCurrency(uiAmountDueNow)}</span>
-              </div>
+              {showAmountDueNowRow && (
+                <div className="flex justify-between gap-2 pt-2 border-t border-white/10 text-base font-semibold">
+                  <span>{stageTitle}</span>
+                  <span>{formatCurrency(uiAmountDueNow)}</span>
+                </div>
+              )}
             </div>
 
             {status.receiptUrl && (

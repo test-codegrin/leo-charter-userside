@@ -26,7 +26,7 @@ import { authAPI } from "@/lib/api";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { AxiosError } from "axios";
-import { CheckCircleIcon, FileText } from "lucide-react";
+import { CheckCircleIcon, FileText, Trash2 } from "lucide-react";
 import { images } from "@/lib/assets";
 
 interface DecodedData {
@@ -175,7 +175,7 @@ export default function PaymentHandler() {
 
   const [invoiceTotal, setInvoiceTotal] = useState<number | null>(null);
   const [totalPaid, setTotalPaid] = useState<number | null>(null);
-  const [remainingAmount, setRemainingAmount] = useState<number | null>(null);
+  const [, setRemainingAmount] = useState<number | null>(null);
 
   const [amountDueNow, setAmountDueNow] = useState<number | null>(null);
 
@@ -186,6 +186,8 @@ export default function PaymentHandler() {
   const [errorMsg, setErrorMsg] = useState<string>("");
 
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
+  const [discountRemoved, setDiscountRemoved] = useState(false);
+  const [depositRemoved, setDepositRemoved] = useState(false);
 
   const successAudioRef = useRef<HTMLAudioElement | null>(null);
   const declineAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -371,6 +373,11 @@ export default function PaymentHandler() {
     })();
   }, [decoded, isDepositStage]);
 
+  useEffect(() => {
+    setDiscountRemoved(false);
+    setDepositRemoved(false);
+  }, [decoded?.invoiceId, invoiceData?.discount_per, invoiceData?.deposit_per]);
+
   const stageKind = useMemo(() => {
     if (isDepositStage) return "deposit";
     if (paymentStage) return paymentStage.toLowerCase();
@@ -403,19 +410,63 @@ export default function PaymentHandler() {
     return isDepositStage ? calculatedTotals.depositAmount : calculatedTotals.totalAmount;
   }, [amountDueNow, calculatedTotals, isDepositStage]);
 
-  const uiRemainingBalance = useMemo(() => {
-    if (remainingAmount != null) return remainingAmount;
-    if (!calculatedTotals) return 0;
-    const paid = totalPaid ?? 0;
-    return Math.max(calculatedTotals.totalAmount - paid, 0);
-  }, [remainingAmount, calculatedTotals, totalPaid]);
-
   const statusLabel = useMemo(() => {
     if (paymentStatus) return humanizeToken(paymentStatus, "Pending");
     if (isFullyPaid) return "Paid";
     if (canPay) return "Pending";
     return "Unavailable";
   }, [paymentStatus, isFullyPaid, canPay]);
+
+  const summarySubtotal = useMemo(() => {
+    if (!calculatedTotals) return 0;
+    return calculatedTotals.subtotal + calculatedTotals.gratuityAmount + calculatedTotals.adminFeesAmount;
+  }, [calculatedTotals]);
+
+  const summaryTax = useMemo(() => {
+    return calculatedTotals?.taxAmount ?? 0;
+  }, [calculatedTotals]);
+
+  const grossBeforeDiscount = useMemo(() => {
+    return summarySubtotal + summaryTax;
+  }, [summarySubtotal, summaryTax]);
+
+  const baseInvoiceTotal = useMemo(() => {
+    if (invoiceTotal != null) return Math.max(invoiceTotal, 0);
+    return Math.max(grossBeforeDiscount, 0);
+  }, [invoiceTotal, grossBeforeDiscount]);
+
+  const baseDiscountAmount = useMemo(() => {
+    if (!invoiceData?.discount_per) return 0;
+    return Math.max(grossBeforeDiscount - baseInvoiceTotal, 0);
+  }, [invoiceData?.discount_per, grossBeforeDiscount, baseInvoiceTotal]);
+
+  const hasDiscount = baseDiscountAmount > 0 && !discountRemoved;
+
+  const displayDiscountAmount = hasDiscount ? baseDiscountAmount : 0;
+
+  const displayInvoiceTotal = useMemo(() => {
+    return Math.max(grossBeforeDiscount - displayDiscountAmount, 0);
+  }, [grossBeforeDiscount, displayDiscountAmount]);
+
+  const baseDepositAmount = useMemo(() => {
+    if (!invoiceData?.deposit_per) return 0;
+    return Math.max(displayInvoiceTotal * (invoiceData.deposit_per / 100), 0);
+  }, [invoiceData?.deposit_per, displayInvoiceTotal]);
+
+  const hasDeposit = baseDepositAmount > 0 && !depositRemoved;
+
+  const displayDepositAmount = hasDeposit ? baseDepositAmount : 0;
+
+  const displayAmountPaid = useMemo(() => {
+    return Math.max(totalPaid ?? 0, 0);
+  }, [totalPaid]);
+
+  const finalDueLabel = hasDeposit ? "Deposit Due" : "Balance Due";
+
+  const finalDueAmount = useMemo(() => {
+    const targetAmount = hasDeposit ? displayDepositAmount : displayInvoiceTotal;
+    return Math.max(targetAmount - displayAmountPaid, 0);
+  }, [hasDeposit, displayDepositAmount, displayInvoiceTotal, displayAmountPaid]);
 
   const handlePayment = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -691,34 +742,75 @@ export default function PaymentHandler() {
                   <span className="text-xs text-zinc-400 text-right">Status: {statusLabel}</span>
                 </div>
 
-                <div className="bg-neutral-900/40 rounded-2xl p-4 space-y-2">
-                  <div className="flex justify-between text-sm md:text-base font-bold">
-                    <span className="text-white">Invoice Total:</span>
-                    <span className="text-green-400">
-                      {formatCurrency(invoiceTotal ?? calculatedTotals.totalAmount)}
-                    </span>
+                <div className="bg-neutral-900/40 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-4 text-sm md:text-base">
+                    <span className="text-zinc-400">Subtotal</span>
+                    <span className="text-right text-white">{formatCurrency(summarySubtotal)}</span>
                   </div>
 
-                  {(totalPaid ?? 0) > 0 && (
-                    <div className="flex justify-between pt-2 border-t border-white/10 text-sm text-zinc-400">
-                      <span>Amount Paid:</span>
-                      <span>{formatCurrency(totalPaid ?? 0)}</span>
+                  <div className="flex items-center justify-between gap-4 text-sm md:text-base">
+                    <span className="text-zinc-400">Tax</span>
+                    <span className="text-right text-white">{formatCurrency(summaryTax)}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-sm md:text-base font-semibold">
+                    <span className="text-white">Invoice Total</span>
+                    <span className="text-right text-green-400">{formatCurrency(displayInvoiceTotal)}</span>
+                  </div>
+
+                  {hasDiscount ? (
+                    <div className="flex items-center justify-between gap-4 text-sm md:text-base">
+                      <div className="flex min-w-0 items-center gap-2 text-zinc-400">
+                        <span>Discount</span>
+                        <button
+                          type="button"
+                          aria-label="Remove discount"
+                          onClick={() => setDiscountRemoved(true)}
+                          className="text-zinc-500 transition hover:text-red-400"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <span className="text-right text-white">-{formatCurrency(displayDiscountAmount)}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-4 text-sm md:text-base">
+                      <span className="text-zinc-500">+ Add Discount</span>
+                      <span />
                     </div>
                   )}
 
-                  {(uiRemainingBalance ?? 0) > 0 && (
-                    <div className="flex justify-between pt-2 border-t border-white/10 text-sm text-zinc-400">
-                      <span>Remaining Balance:</span>
-                      <span>{formatCurrency(uiRemainingBalance)}</span>
+                  {hasDeposit ? (
+                    <div className="flex items-center justify-between gap-4 text-sm md:text-base">
+                      <div className="flex min-w-0 items-center gap-2 text-zinc-400">
+                        <span>Deposit</span>
+                        <button
+                          type="button"
+                          aria-label="Remove deposit"
+                          onClick={() => setDepositRemoved(true)}
+                          className="text-zinc-500 transition hover:text-red-400"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <span className="text-right text-white">{formatCurrency(displayDepositAmount)}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-4 text-sm md:text-base">
+                      <span className="text-zinc-500">+ Deposit</span>
+                      <span />
                     </div>
                   )}
 
-                  {!isFullyPaid && canPay && (
-                    <div className="flex justify-between pt-2 border-t border-white/10 text-sm text-zinc-200 font-semibold">
-                      <span>{stageTitle}:</span>
-                      <span>{formatCurrency(uiAmountDueNow)}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-sm md:text-base">
+                    <span className="text-zinc-400">Amount Paid</span>
+                    <span className="text-right text-white">{formatCurrency(displayAmountPaid)}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-sm md:text-base font-semibold">
+                    <span className="text-white">{finalDueLabel}</span>
+                    <span className="text-right text-white">{formatCurrency(finalDueAmount)}</span>
+                  </div>
 
                   {/* ✅ Always show receipt button if available */}
                   {receiptUrl && (
