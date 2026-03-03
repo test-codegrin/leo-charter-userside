@@ -37,6 +37,7 @@ interface ManualPaymentStatusPayload {
   invoiceUrl?: string;
   invoiceLink?: string;
   invoiceTotal?: number | string;
+  taxTotal?: number | string;
   totalPaid?: number | string;
   remainingAmount?: number | string;
   totalAmount?: number | string;
@@ -51,6 +52,7 @@ interface ManualPaymentStatusPayload {
 interface ManualPaymentStatus {
   invoiceUrl: string | null;
   invoiceTotal: number | null;
+  taxTotal: number | null;
   totalPaid: number | null;
   remainingAmount: number | null;
   amountDueNow: number | null;
@@ -84,6 +86,7 @@ const extractStatusPayload = (rawData: unknown): ManualPaymentStatusPayload => {
 
 const normalizeStatus = (payload: ManualPaymentStatusPayload): ManualPaymentStatus => {
   const invoiceTotal = parseNumberValue(payload.invoiceTotal);
+  const taxTotal = parseNumberValue(payload.taxTotal);
   const totalPaid = parseNumberValue(payload.totalPaid);
   const remainingAmount = parseNumberValue(payload.remainingAmount);
   const amountDueNow = parseNumberValue(payload.totalAmount) ?? remainingAmount;
@@ -105,6 +108,7 @@ const normalizeStatus = (payload: ManualPaymentStatusPayload): ManualPaymentStat
   return {
     invoiceUrl,
     invoiceTotal,
+    taxTotal,
     totalPaid,
     remainingAmount,
     amountDueNow,
@@ -120,6 +124,7 @@ const normalizeStatus = (payload: ManualPaymentStatusPayload): ManualPaymentStat
 const EMPTY_STATUS: ManualPaymentStatus = {
   invoiceUrl: null,
   invoiceTotal: null,
+  taxTotal: null,
   totalPaid: null,
   remainingAmount: null,
   amountDueNow: null,
@@ -174,6 +179,12 @@ export default function ManualPaymentHandler() {
     if (status.invoiceTotal != null) return Math.max(status.invoiceTotal, 0);
     return Math.max((status.totalPaid ?? 0) + (status.remainingAmount ?? 0), 0);
   }, [status.invoiceTotal, status.totalPaid, status.remainingAmount]);
+
+  const uiTaxTotal = useMemo(() => Math.max(status.taxTotal ?? 0, 0), [status.taxTotal]);
+
+  const uiSubtotal = useMemo(() => {
+    return Math.max(uiInvoiceTotal - uiTaxTotal, 0);
+  }, [uiInvoiceTotal, uiTaxTotal]);
 
   const uiTotalPaid = useMemo(() => Math.max(status.totalPaid ?? 0, 0), [status.totalPaid]);
 
@@ -433,6 +444,14 @@ export default function ManualPaymentHandler() {
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between gap-2 pt-2 border-t border-white/10">
+                <span className="text-zinc-400">Subtotal</span>
+                <span>{formatCurrency(uiSubtotal)}</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-zinc-400">Tax</span>
+                <span>{formatCurrency(uiTaxTotal)}</span>
+              </div>
+              <div className="flex justify-between gap-2">
                 <span className="text-zinc-400">Invoice Total</span>
                 <span className="text-green-400 font-semibold">{formatCurrency(uiInvoiceTotal)}</span>
               </div>
