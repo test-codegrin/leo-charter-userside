@@ -149,6 +149,13 @@ interface CalculatedTotals {
   depositPercentage: number;
 }
 
+const INVOICE_PREFIX = "0026";
+
+const formatInvoiceNumber = (invoiceId?: number | null): string => {
+  if (invoiceId == null) return "-";
+  return `#${INVOICE_PREFIX}${invoiceId}`;
+};
+
 export default function PaymentHandler() {
   const stripe = useStripe();
   const elements = useElements();
@@ -468,6 +475,11 @@ export default function PaymentHandler() {
     return Math.max(targetAmount - displayAmountPaid, 0);
   }, [hasDeposit, displayDepositAmount, displayInvoiceTotal, displayAmountPaid]);
 
+  const formattedInvoiceNumber = useMemo(
+    () => formatInvoiceNumber(decoded?.invoiceId),
+    [decoded?.invoiceId]
+  );
+
   const handlePayment = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!stripe || !elements || !decoded) return;
@@ -496,7 +508,7 @@ export default function PaymentHandler() {
         amount,
         currency: "cad",
         email: decoded.email,
-        description: `Invoice #${decoded.invoiceId} ${stageTitle}`,
+        description: `Invoice ${formatInvoiceNumber(decoded.invoiceId)} ${stageTitle}`,
         invoiceId: decoded.invoiceId,
         paymentType: isDepositStage ? "deposit" : "full",
         isDepositStage,
@@ -984,7 +996,7 @@ export default function PaymentHandler() {
               />
             </motion.div>
             <p className="text-zinc-400 mb-3 text-sm md:text-base">
-              Thank you! Your payment for invoice #{decoded?.invoiceId} is successful.
+              Thank you! Your payment for invoice {formattedInvoiceNumber} is successful.
             </p>
 
             {/* ✅ Show receipt immediately after deposit/partial/full */}

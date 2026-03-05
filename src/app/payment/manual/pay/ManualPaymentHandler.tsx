@@ -64,6 +64,13 @@ interface ManualPaymentStatus {
   receiptUrl: string | null;
 }
 
+const INVOICE_PREFIX = "0026";
+
+const formatInvoiceNumber = (invoiceId?: number | null): string => {
+  if (invoiceId == null) return "-";
+  return `#${INVOICE_PREFIX}${invoiceId}`;
+};
+
 const parseNumberValue = (value: number | string | null | undefined): number | null => {
   if (value == null) return null;
   if (typeof value === "string" && value.trim() === "") return null;
@@ -161,6 +168,11 @@ export default function ManualPaymentHandler() {
     if (!decoded) return null;
     return decoded.manualInvoiceId ?? null;
   }, [decoded]);
+
+  const formattedInvoiceNumber = useMemo(
+    () => formatInvoiceNumber(resolvedInvoiceId),
+    [resolvedInvoiceId]
+  );
 
   const stageKind = useMemo(() => {
     const raw = status.paymentStage ?? status.paymentStatus;
@@ -331,7 +343,7 @@ export default function ManualPaymentHandler() {
         manualInvoiceId: resolvedInvoiceId,
         currency: "cad",
         email: decoded?.email,
-        description: `Manual invoice #${resolvedInvoiceId}`,
+        description: `Manual invoice ${formatInvoiceNumber(resolvedInvoiceId)}`,
       });
 
       const clientSecret = res?.clientSecret || res?.data?.clientSecret;
@@ -432,7 +444,7 @@ export default function ManualPaymentHandler() {
           <div className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-5 md:p-6 space-y-4 h-fit">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Invoice</p>
-              <h1 className="text-xl md:text-2xl font-semibold mt-1">#{resolvedInvoiceId}</h1>
+              <h1 className="text-xl md:text-2xl font-semibold mt-1">{formattedInvoiceNumber}</h1>
             </div>
 
             <div className="space-y-2 text-sm">
@@ -464,7 +476,9 @@ export default function ManualPaymentHandler() {
                   !showAmountDueNowRow ? "pt-2 border-t border-white/10 text-base font-semibold" : ""
                 }`}
               >
-                <span className={!showAmountDueNowRow ? "text-white" : "text-zinc-400"}>Remaining</span>
+                <span className={!showAmountDueNowRow ? "text-white" : "text-zinc-400"}>
+                  Checkout Balance Due
+                </span>
                 <span>{formatCurrency(uiRemaining)}</span>
               </div>
               {showAmountDueNowRow && (
@@ -580,7 +594,7 @@ export default function ManualPaymentHandler() {
             Payment Successful
           </ModalHeader>
           <ModalBody>
-            <p className="text-zinc-300">Payment for invoice #{resolvedInvoiceId} was successful.</p>
+            <p className="text-zinc-300">Payment for invoice {formattedInvoiceNumber} was successful.</p>
             {status.receiptUrl && (
               <Button
                 variant="flat"
