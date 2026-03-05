@@ -26,7 +26,7 @@ import { authAPI } from "@/lib/api";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { AxiosError } from "axios";
-import { CheckCircleIcon, FileText, Trash2 } from "lucide-react";
+import { CheckCircleIcon, FileText } from "lucide-react";
 import { images } from "@/lib/assets";
 
 interface DecodedData {
@@ -474,6 +474,7 @@ export default function PaymentHandler() {
     const targetAmount = hasDeposit ? displayDepositAmount : displayInvoiceTotal;
     return Math.max(targetAmount - displayAmountPaid, 0);
   }, [hasDeposit, displayDepositAmount, displayInvoiceTotal, displayAmountPaid]);
+  const showFinalDueRow = !hasDeposit || finalDueAmount > 0;
 
   const formattedInvoiceNumber = useMemo(
     () => formatInvoiceNumber(decoded?.invoiceId),
@@ -597,7 +598,7 @@ export default function PaymentHandler() {
   return (
     <div className="min-h-screen md:h-screen w-screen flex flex-col md:flex-row bg-[#0B0B0B] text-white overflow-hidden">
       {/* LEFT SIDE - Receipt */}
-      <div className="relative flex-1 p-4 md:p-6 lg:p-10 flex items-center justify-center md:border-r border-neutral-800 overflow-y-auto overflow-x-hidden min-w-0">
+      <div className="relative flex-1 p-4 pt-20 md:p-6 md:pt-24 lg:p-10 lg:pt-28 flex items-start justify-center md:border-r border-neutral-800 overflow-y-auto overflow-x-hidden min-w-0">
         <div className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 z-10">
           <Image
             src={images.logo}
@@ -770,47 +771,17 @@ export default function PaymentHandler() {
                     <span className="text-right text-green-400">{formatCurrency(displayInvoiceTotal)}</span>
                   </div>
 
-                  {hasDiscount ? (
+                  {hasDiscount && (
                     <div className="flex items-center justify-between gap-4 text-sm md:text-base">
-                      <div className="flex min-w-0 items-center gap-2 text-zinc-400">
-                        <span>Discount</span>
-                        <button
-                          type="button"
-                          aria-label="Remove discount"
-                          onClick={() => setDiscountRemoved(true)}
-                          className="text-zinc-500 transition hover:text-red-400"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
+                      <span className="text-zinc-400">Discount</span>
                       <span className="text-right text-white">-{formatCurrency(displayDiscountAmount)}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between gap-4 text-sm md:text-base">
-                      <span className="text-zinc-500">+ Add Discount</span>
-                      <span />
                     </div>
                   )}
 
-                  {hasDeposit ? (
+                  {hasDeposit && (
                     <div className="flex items-center justify-between gap-4 text-sm md:text-base">
-                      <div className="flex min-w-0 items-center gap-2 text-zinc-400">
-                        <span>Deposit</span>
-                        <button
-                          type="button"
-                          aria-label="Remove deposit"
-                          onClick={() => setDepositRemoved(true)}
-                          className="text-zinc-500 transition hover:text-red-400"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
+                      <span className="text-zinc-400">Deposit</span>
                       <span className="text-right text-white">{formatCurrency(displayDepositAmount)}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between gap-4 text-sm md:text-base">
-                      <span className="text-zinc-500">+ Deposit</span>
-                      <span />
                     </div>
                   )}
 
@@ -819,10 +790,12 @@ export default function PaymentHandler() {
                     <span className="text-right text-white">{formatCurrency(displayAmountPaid)}</span>
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-sm md:text-base font-semibold">
-                    <span className="text-white">{finalDueLabel}</span>
-                    <span className="text-right text-white">{formatCurrency(finalDueAmount)}</span>
-                  </div>
+                  {showFinalDueRow && (
+                    <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-sm md:text-base font-semibold">
+                      <span className="text-white">{finalDueLabel}</span>
+                      <span className="text-right text-white">{formatCurrency(finalDueAmount)}</span>
+                    </div>
+                  )}
 
                   {/* ✅ Always show receipt button if available */}
                   {receiptUrl && (
