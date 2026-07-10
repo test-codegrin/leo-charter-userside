@@ -1,0 +1,159 @@
+import axios from "axios";
+import { BookingPayload, RegisterPayload } from "./types";
+
+// ✅ Create axios instance
+const api = axios.create({
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
+  timeout: 30000,
+});
+
+// // ✅ Add Authorization token automatically
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     console.group("🚨 API Error");
+//     console.error("URL:", error.config?.url);
+//     console.error("Status:", error.response?.status);
+//     console.error("Response Data:", error.response?.data);
+//     console.error("Message:", error.message);
+//     console.error("Request:", error.request);
+//     console.groupEnd();
+
+//     if (typeof window !== "undefined" && error.response?.status === 401) {
+//       const currentPath = window.location.pathname;
+//       const isLoginPage =
+//         currentPath === "/" ||
+//         currentPath.includes("/login") ||
+//         currentPath.includes("/verify");
+//       const hasToken = localStorage.getItem("token");
+
+//       if (!isLoginPage && hasToken) {
+//         localStorage.removeItem("token");
+//         localStorage.removeItem("user");
+//         window.location.href = "/";
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+// ✅ Handle Unauthorized (401) responses safely
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // console.error("API Error:", error.response?.data || error.message);
+
+    if (typeof window !== "undefined" && error.response?.status === 401) {
+      const currentPath = window.location.pathname;
+      const isLoginPage =
+        currentPath === "/" ||
+        currentPath.includes("/login") ||
+        currentPath.includes("/verify");
+      const isLoginRequest = error.config?.url?.includes("/login");
+      const hasToken = localStorage.getItem("token");
+
+      // Prevent redirect loops & clear auth if necessary
+      if (!isLoginPage && !isLoginRequest && hasToken) {
+        console.warn("401 detected — clearing token and redirecting to login");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const authAPI = {
+  sendOtp: (email: string) => api.post("/user/send-otp", { email }),
+  verifyOtp: (email: string, otp: string, token: string) => api.post("/user/verify-otp", { email, otp, token }),
+  register: (data: RegisterPayload) => api.post("/user/register", data),
+  getProfile: (token: string) => api.get("/user/profile", { headers: { Authorization: `Bearer ${token}` } }),
+  updateProfile: (payload: Partial<Record<string, string>>, token: string) => api.put("/user/profile", payload, { headers: { Authorization: `Bearer ${token}` } }),
+  getUserTrips: (userId: number, token: string, page: number, limit: number) =>
+    api.get(
+      `/user/trips/${userId}?page=${page}&limit=${limit}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ),
+
+  confirmBooking: (payload: BookingPayload) => api.post(`/user/confirm-booking/${payload.tripId}`, payload),
+  createPaymentIntent: async (payload: {
+    paymentToken: string;
+    amount: number;
+    currency?: string;
+    email?: string;
+    description?: string;
+    invoiceId?: number;
+    manualInvoiceId?: number;
+    paymentType?: "deposit" | "full";
+    isDepositStage?: boolean;
+    paymentStage?: string | null;
+  }) => {
+    try {
+      const response = await api.post("/payments/create-payment-intent", {
+        ...payload,
+        currency: payload.currency || "cad",
+      });
+      // ✅ return both full response and data keys
+      return {
+        ...response.data,
+        raw: response,
+      };
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      throw error;
+    }
+  },
+  createManualPaymentIntent: async (payload: {
+    paymentToken: string;
+    amount?: number;
+    manualInvoiceId: number;
+    currency?: string;
+    email?: string;
+    description?: string;
+    paymentType?: "deposit" | "full";
+    isDepositStage?: boolean;
+    paymentStage?: string | null;
+  }) => {
+    try {
+      const { amount, ...restPayload } = payload;
+      const response = await api.post("/payments/create-manual-payment-intent", {
+        ...restPayload,
+        ...(amount != null ? { amount } : {}),
+        currency: restPayload.currency || "cad",
+      });
+      return {
+        ...response.data,
+        raw: response,
+      };
+    } catch (error) {
+      console.error("Error creating manual payment intent:", error);
+      throw error;
+    }
+  },
+  getInvoice: (invoiceId: number) => api.get(`/user/invoice/${invoiceId}`),
+  getTripById: (tripId: number, token: string) => api.get(`/user/trip-details/${tripId}`, { headers: { Authorization: `Bearer ${token}` } }),
+  getPaymentStatus: (invoiceId: number) => api.get(`/payments/check-payment-status/${invoiceId}`),
+  getManualPaymentStatus: (manualInvoiceId: number) =>
+    api.get(`/payments/check-manual-payment-status/${manualInvoiceId}`),
+  addPaymentDetails: (payload: {
+    invoiceId?: number;
+    manualInvoiceId?: number;
+    clientSecret: string;
+    paymentIntentId: string;
+    userId?: number;
+    paymentType: "deposit" | "full";
+  }) => api.post(`/payments/add-payment-details`, payload),
+  addManualPaymentDetails: (payload: {
+    manualInvoiceId: number;
+    clientSecret: string;
+    receiptUrl?: string;
+    latestChargeId?: string;
+    paymentIntentId: string;
+    userId?: number;
+    paymentType: "deposit" | "full";
+  }) => api.post(`/payments/add-manual-payment-details`, payload),
+};
+
+export default api;
